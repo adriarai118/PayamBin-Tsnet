@@ -204,6 +204,7 @@ public class ServerService extends Service {
             startMdns();
             registerDiag();
             if (Prefs.proxyOn(this)) ProxyServer.start(this);
+            TailscaleManager.start(this); // فقط وقتی در تنظیمات روشن است
             handler.postDelayed(refresher, 20_000);
         }
         return START_STICKY;
@@ -332,6 +333,7 @@ public class ServerService extends Service {
         }
         running = false;
         handler.removeCallbacksAndMessages(null);
+        TailscaleManager.stop(this);
         if (server != null) server.stop();
         server = null;
         try {

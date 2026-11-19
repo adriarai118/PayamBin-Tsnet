@@ -160,6 +160,40 @@ public final class Prefs {
         sp(c).edit().putStringSet("proxy_clients", new HashSet<>(s)).apply();
     }
 
+    // ---------- Tailscale (دسترسی اینترنتی، tsnet) ----------
+    /** دسترسی اینترنتی از طریق Tailscale روشن است؟ (پیش‌فرض: خاموش) */
+    public static boolean tsnetEnabled(Context c) {
+        return sp(c).getBoolean("tsnet_enabled", false);
+    }
+
+    public static void setTsnetEnabled(Context c, boolean v) {
+        sp(c).edit().putBoolean("tsnet_enabled", v).apply();
+    }
+
+    /** نام دستگاه در tailnet، مثل payambin */
+    public static String tsnetHostname(Context c) {
+        String h = sp(c).getString("tsnet_hostname", "payambin");
+        return h == null || h.trim().isEmpty() ? "payambin" : h.trim();
+    }
+
+    public static void setTsnetHostname(Context c, String h) {
+        sp(c).edit().putString("tsnet_hostname", h == null ? "payambin" : h.trim()).apply();
+    }
+
+    /**
+     * کلید ورود (auth key) اختیاری از کنسول مدیریت Tailscale.
+     * خالی یعنی ورود تعاملی با لینک. در SharedPreferences خصوصی برنامه
+     * نگه داشته می‌شود (مثل رمز ورود)؛ هرگز در کد یا گیت‌هاب ننویسید.
+     */
+    public static String tsnetAuthKey(Context c) {
+        String k = sp(c).getString("tsnet_auth_key", "");
+        return k == null ? "" : k.trim();
+    }
+
+    public static void setTsnetAuthKey(Context c, String k) {
+        sp(c).edit().putString("tsnet_auth_key", k == null ? "" : k.trim()).apply();
+    }
+
     /** دوربین همیشه آماده: بعد از یک بار تأیید، بدون تأیید دوباره روشن شود */
     public static boolean camStandby(Context c) {
         return sp(c).getBoolean("cam_standby", true);

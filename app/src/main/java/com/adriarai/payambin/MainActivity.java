@@ -652,6 +652,34 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "پاک شد؛ هر دستگاه باید دوباره وارد صفحه‌ی پیام‌بین شود", Toast.LENGTH_LONG).show();
         });
 
+        LinearLayout kts = card();
+        heading(kts, "🌐 Tailscale (دسترسی از اینترنت)");
+        para(kts, "با این گزینه پیام‌بین از طریق Tailscale هم در دسترس است؛ بدون نصب برنامهٔ جدا و بدون VPN سیستم. برای هر گوشی یک بار ورود به حساب Tailscale لازم است.");
+        Switch ts = switchRow(kts, "روشن (دسترسی اینترنتی)", Prefs.tsnetEnabled(this));
+        ts.setOnCheckedChangeListener((b, v) -> {
+            Prefs.setTsnetEnabled(this, v);
+            if (v) {
+                if (ServerService.running) TailscaleManager.start(this);
+                else ServerService.start(this);
+            } else TailscaleManager.stop(this);
+            if (pageRefresh != null) handler.postDelayed(pageRefresh, 800);
+        });
+        final TextView tsStatus = text(13, TEXT, false);
+        tsStatus.setTextIsSelectable(true);
+        tsStatus.setPadding(0, dp(6), 0, 0);
+        kts.addView(tsStatus);
+        final TextView tsLoginBtn = button(kts, "باز کردن لینک ورود به Tailscale", true, v -> {
+            String u = TailscaleManager.loginUrl(this);
+            if (!u.isEmpty()) {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(u)));
+                } catch (Exception ignored) {
+                }
+            }
+        });
+        button(kts, "نام دستگاه در Tailscale", false, v -> askTsnetHostname());
+        button(kts, "کلید ورود (auth key) — اختیاری", false, v -> askTsnetAuthKey());
+
         LinearLayout kcam = card();
         heading(kcam, "📷 دوربین");
         Switch sb = switchRow(kcam, "همیشه آماده (روشن شدن از کامپیوتر بدون تأیید روی گوشی)", Prefs.camStandby(this));
@@ -718,6 +746,8 @@ public class MainActivity extends Activity {
             portBtn.setText("پورت: " + Prefs.port(this) + "  (تغییر)");
             pinTv.setText("رمز ورود فعلی: " + Prefs.pin(this));
             keyTv.setText("\nکلید API: " + Prefs.apiKey(this));
+            tsStatus.setText(TailscaleManager.statusText(this));
+            tsLoginBtn.setVisibility(TailscaleManager.loginUrl(this).isEmpty() ? View.GONE : View.VISIBLE);
         };
     }
 
@@ -887,6 +917,56 @@ public class MainActivity extends Activity {
             startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName())));
         } catch (Exception ignored) {
         }
+    }
+
+    private void askTsnetHostname() {
+        final EditText et = new EditText(this);
+        et.setInputType(InputType.TYPE_CLASS_TEXT);
+        et.setText(Prefs.tsnetHostname(this));
+        et.setTextColor(TEXT);
+        FrameLayout box = new FrameLayout(this);
+        box.setPadding(dp(20), dp(8), dp(20), 0);
+        box.addView(et, new FrameLayout.LayoutParams(-1, ViewGroup.LayoutParams.WRAP_CONTENT));
+        dialog().setTitle("نام دستگاه در Tailscale")
+                .setView(box)
+                .setPositiveButton("ذخیره", (d, w) -> {
+                    String h = et.getText().toString().trim().toLowerCase(java.util.Locale.US)
+                            .replaceAll("[^a-z0-9-]", "-").replaceAll("-+", "-");
+                    if (h.isEmpty()) h = "payambin";
+                    Prefs.setTsnetHostname(this, h);
+                    restartServerIfRunning();
+                })
+                .setNegativeButton("انصراف", null)
+                .show();
+    }
+
+    private void askTsnetAuthKey() {
+        final EditText et = new EditText(this);
+        et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        et.setText(Prefs.tsnetAuthKey(this));
+        et.setTextColor(TEXT);
+        et.setHint("خالی = ورود با لینک");
+        FrameLayout box = new FrameLayout(this);
+        box.setPadding(dp(20), dp(8), dp(20), 0);
+        box.addView(et, new FrameLayout.LayoutParams(-1, ViewGroup.LayoutParams.WRAP_CONTENT));
+        dialog().setTitle("کلید ورود Tailscale (اختیاری)")
+                .setView(box)
+                .setPositiveButton("ذخیره", (d, w) -> {
+                    Prefs.setTsnetAuthKey(this, et.getText().toString().trim());
+                    Toast.makeText(this, "ذخیره شد — کلید را با کسی به اشتراک نگذارید", Toast.LENGTH_LONG).show();
+                    restartServerIfRunning();
+                })
+                .setNegativeButton("انصراف", null)
+                .show();
+    }
+
+    /** خاموش و روشن کردن سرور برای اعمال تنظیمات Tailscale/پورت */
+    private void restartServerIfRunning() {
+        if (ServerService.running) {
+            ServerService.stop(this);
+            handler.postDelayed(() -> ServerService.start(this), 600);
+        }
+        if (pageRefresh != null) handler.postDelayed(pageRefresh, 900);
     }
 
     private void askPort() {
