@@ -19,6 +19,23 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27'
+
+      - name: Build tsnet AAR
+        run: |
+          echo "y" | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018" || true
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init
+          cd tsnet/go
+          go mod tidy
+          go vet ./...
+          gomobile bind -target=android -androidapi 26 \
+            -javapkg=com.adriarai.payambin.tsnet \
+            -o ../../app/libs/tsnet.aar .
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
