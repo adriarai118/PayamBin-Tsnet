@@ -47,3 +47,12 @@ android {
         abortOnError false
     }
 }
+
+dependencies {
+    // ماژول tsnet (Tailscale داخلی): فقط وقتی AAR ساخته شده باشد وصل می‌شود؛
+    // اگر app/libs/tsnet.aar نباشد، TailscaleManager با reflection «در دسترس نیست»
+    // گزارش می‌دهد و بقیهٔ برنامه عادی کار می‌کند. ساخت AAR را در TSNET.md ببینید.
+    if (file('libs/tsnet.aar').exists()) {
+        implementation files('libs/tsnet.aar')
+    }
+}
