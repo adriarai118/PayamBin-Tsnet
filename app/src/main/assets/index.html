@@ -1,0 +1,2267 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" id="favicon">
+<title>پیام‌بین</title>
+<style>
+:root{
+  --bg:#f3f5f7; --panel:#fff; --line:#e3e7ec; --ink:#0f172a; --mute:#64748b; --soft:#f1f5f9;
+  --acc:#0f766e; --acc2:#14b8a6; --accsoft:#ccfbf1; --in:#ffffff; --out:#d7f5ec; --warn:#fff7ed; --warnline:#fed7aa; --bad:#b91c1c;
+  --sel:#e6f6f3; --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b1220; --panel:#111a2b; --line:#1f2a3d; --ink:#e5edf7; --mute:#8a9ab3; --soft:#162036;
+    --acc:#2dd4bf; --acc2:#14b8a6; --accsoft:#0f3b38; --in:#16213a; --out:#0f3b38; --warn:#2a1d0e; --warnline:#5b3a14; --bad:#f87171; --sel:#132c33;
+    --shadow:0 1px 2px rgba(0,0,0,.3); }
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:"Vazirmatn","Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+button{cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:7px 12px}
+button:hover{border-color:var(--acc)}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button.pri:hover{filter:brightness(1.08)}
+button:disabled{opacity:.55;cursor:default}
+
+/* ورود */
+.login{min-height:100%;display:grid;place-items:center;padding:24px}
+.login .card{width:min(360px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px 26px;box-shadow:var(--shadow);text-align:center}
+.logo{width:56px;height:56px;border-radius:16px;background:var(--acc);display:grid;place-items:center;margin:0 auto 12px}
+.login h1{font-size:20px;margin:6px 0 4px}
+.login p{color:var(--mute);margin:0 0 18px;line-height:1.8}
+.login input{width:100%;text-align:center;letter-spacing:.5em;font-size:24px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--soft);direction:ltr}
+.login input:focus{outline:2px solid var(--acc2);border-color:transparent}
+.login button{width:100%;margin-top:12px;padding:11px}
+.err{color:var(--bad);min-height:22px;margin-top:8px}
+
+/* سربرگ */
+#app{height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px}
+.brand .logo{width:30px;height:30px;border-radius:9px;margin:0}
+.tabs{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:11px;margin-inline-start:10px}
+.tab{border:0;background:transparent;padding:6px 14px;border-radius:8px;display:flex;align-items:center;gap:7px}
+.tab.on{background:var(--panel);box-shadow:var(--shadow);font-weight:700}
+.badge{background:var(--acc);color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;min-width:20px;text-align:center}
+.spacer{flex:1}
+header{flex-wrap:wrap;row-gap:8px}
+.conn span{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab{white-space:nowrap}
+@media (max-width:1380px){ .conn span{display:none} #otpFrom{display:none} .brand{font-size:0;gap:0} .brand .logo{font-size:14px} }
+@media (max-width:1150px){ .tab{padding:6px 9px} header{gap:8px} }
+.conn{display:flex;align-items:center;gap:7px;color:var(--mute);font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
+.conn.off .dot{background:#ef4444}
+.banner{background:var(--warn);border-bottom:1px solid var(--warnline);padding:8px 16px;font-size:13px;line-height:1.9}
+
+/* بدنه */
+main{flex:1;min-height:0;display:flex}
+.view{flex:1;display:flex;min-height:0}
+.side{width:340px;max-width:42%;background:var(--panel);border-inline-end:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.side-top{display:flex;gap:8px;padding:10px;border-bottom:1px solid var(--line);align-items:center}
+.side-top input{flex:1;min-width:0;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--soft)}
+.side-top input:focus{outline:2px solid var(--acc2);border-color:transparent}
+.list{flex:1;overflow:auto}
+.sect{padding:8px 14px;font-size:12px;color:var(--mute);background:var(--soft);position:sticky;top:0}
+.item{display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;align-items:center}
+.item:hover{background:var(--soft)}
+.item.sel{background:var(--sel)}
+.av{width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px}
+.meta{flex:1;min-width:0}
+.row1{display:flex;gap:6px;align-items:center}
+.nm{font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm{color:var(--mute);font-size:12px;flex:none}
+.sn{color:var(--mute);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
+.item.unread .nm,.item.unread .sn{color:var(--ink)}
+.item.unread .sn{font-weight:600}
+
+.conv{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.conv-head{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);min-height:61px}
+.conv-head .nm{font-size:15px}
+.conv-head .sub{color:var(--mute);font-size:12px;direction:ltr;text-align:right}
+.back{display:none}
+.msgs{flex:1;overflow:auto;padding:16px 6%;display:flex;flex-direction:column;gap:6px}
+.empty{margin:auto;color:var(--mute);text-align:center;line-height:2}
+.day{align-self:center;background:var(--soft);color:var(--mute);font-size:12px;border-radius:99px;padding:3px 12px;margin:10px 0 4px}
+.b{max-width:min(560px,78%);padding:8px 12px 6px;border-radius:14px;line-height:1.85;white-space:pre-wrap;word-wrap:break-word;box-shadow:var(--shadow);position:relative}
+.b.in{align-self:flex-start;background:var(--in);border-start-start-radius:4px}
+.b.out{align-self:flex-end;background:var(--out);border-start-end-radius:4px}
+.b .ft{display:flex;gap:8px;justify-content:flex-end;font-size:11px;color:var(--mute);margin-top:2px}
+.b .ft .fail{color:var(--bad);font-weight:700}
+.b a{color:var(--acc)}
+.code{background:var(--accsoft);color:var(--ink);border-radius:6px;padding:0 5px;cursor:copy;font-weight:700;direction:ltr;unicode-bidi:isolate;border-bottom:1px dashed var(--acc)}
+.code:hover{background:var(--acc2);color:#fff}
+
+.compose{display:flex;gap:8px;padding:10px 14px;background:var(--panel);border-top:1px solid var(--line);align-items:flex-end}
+.compose textarea{flex:1;resize:none;max-height:160px;min-height:40px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:var(--soft);line-height:1.7}
+.compose textarea:focus{outline:2px solid var(--acc2);border-color:transparent}
+.compose select{padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--soft);height:40px}
+.compose button{height:40px;padding:0 18px}
+.cnt{font-size:11px;color:var(--mute);align-self:center;min-width:44px;text-align:center}
+
+/* اعلان‌ها */
+.nlist{padding:14px 6%}
+.n{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow);max-width:760px;width:100%;align-self:center}
+.n .h{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.chip{font-size:11px;border-radius:99px;padding:2px 9px;color:#fff;flex:none}
+.n .t{font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.n .x{white-space:pre-wrap;word-wrap:break-word;line-height:1.85}
+.n .s{color:var(--acc);font-weight:600}
+.n.new{border-color:var(--acc2)}
+.fbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0 4px}
+.fbar .fm{margin-inline-end:auto}
+.fbar input{padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:12.5px;width:150px}
+.fbar select,.fbar button{font-size:12.5px}
+.fbar select{padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.fmore{display:block;margin:6px auto 0;font-size:12.5px}
+.wcbox{max-width:680px}
+.wcopts{display:flex;flex-wrap:wrap;gap:8px 14px;margin:12px 0;font-size:13px}
+.wcopts label{display:flex;gap:6px;align-items:center}
+.wclink{display:flex;gap:6px}
+.wclink input{flex:1;font:12px monospace;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);min-width:0}
+.wcsteps{padding-inline-start:20px;line-height:1.9;font-size:13.5px;margin:6px 0}
+.wcsteps code{background:var(--bg);padding:1px 5px;border-radius:4px;direction:ltr;display:inline-block}
+.wctips{background:var(--accsoft);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.9}
+.ctx{position:fixed;z-index:9999;min-width:220px;max-width:320px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.22);padding:6px;font-size:13px;direction:rtl;animation:ctxIn .1s ease-out}
+@keyframes ctxIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+.ctx .hd{padding:4px 10px 6px;color:var(--mute);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid var(--line);margin-bottom:4px}
+.ctx button{display:flex;gap:10px;align-items:center;width:100%;text-align:right;border:0;background:none;padding:7px 10px;border-radius:8px;cursor:pointer;color:var(--ink);font:inherit}
+.ctx button:hover,.ctx button.kb{background:var(--accsoft)}
+.ctx button .i{width:18px;text-align:center;flex:none}
+.ctx button .k{margin-inline-start:auto;color:var(--mute);font-size:11px}
+.ctx button.danger{color:#dc2626}
+.ctx hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
+.ctx .ft{color:var(--mute);font-size:10.5px;padding:5px 10px 2px;border-top:1px solid var(--line);margin-top:4px}
+.ctx-hl{outline:2px solid var(--acc);outline-offset:2px;border-radius:10px}
+.n.unread{border-inline-start:4px solid var(--acc);background:linear-gradient(to left,var(--accsoft),var(--panel) 40%)}
+.n.unread .t::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-inline-end:6px;vertical-align:middle}
+.n .acts button.rd{color:var(--acc);border-color:var(--acc);font-weight:700}
+.n.unread .acts{opacity:1}
+.nopts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-inline-start:auto;font-size:12px}
+.nopts label{display:flex;gap:4px;align-items:center;cursor:pointer;color:var(--mute);white-space:nowrap}
+.nopts button{font-size:12px;padding:4px 9px}
+
+/* سربرگ: باتری، کد، دکمه‌ها */
+.hbtn{padding:6px 10px}
+.bat{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--mute)}
+.bat .cell{width:24px;height:12px;border:1.5px solid currentColor;border-radius:3px;position:relative;padding:1px}
+.bat .cell::after{content:"";position:absolute;left:100%;top:3px;width:2px;height:4px;background:currentColor;border-radius:0 1px 1px 0}
+.bat .fill{height:100%;border-radius:1px;background:#22c55e}
+.bat.low{color:var(--bad)} .bat.low .fill{background:var(--bad)}
+.otp{display:flex;align-items:center;gap:6px;background:var(--accsoft);border:1px dashed var(--acc);border-radius:9px;padding:4px 10px;cursor:copy;font-size:13px}
+.otp b{direction:ltr;letter-spacing:.08em;font-size:15px}
+.otp small{color:var(--mute)}
+.callbar{background:#16a34a;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;font-weight:600}
+.callbar.off{background:#0369a1}
+.callbar .ring{animation:ring 1s infinite}
+@keyframes ring{0%,100%{transform:rotate(0)}25%{transform:rotate(-15deg)}75%{transform:rotate(15deg)}}
+
+/* تماس‌ها */
+.clist{flex:1;overflow:auto;padding:14px 6%}
+.call{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;max-width:760px;width:100%;margin:0 auto 6px}
+.call .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:17px;flex:none}
+.call .ic.in{background:#dcfce7;color:#15803d} .call .ic.out{background:#dbeafe;color:#1d4ed8} .call .ic.miss{background:#fee2e2;color:#b91c1c}
+.call.miss .nm{color:var(--bad)}
+.call .num{direction:ltr;text-align:right;color:var(--mute);font-size:12px}
+.call button{padding:5px 10px;font-size:12px}
+
+/* حذف/مسدود اعلان */
+.n .acts{display:flex;gap:4px;flex:none;opacity:.45;transition:.15s}
+.n:hover .acts{opacity:1}
+.n .acts button{padding:2px 7px;font-size:12px;border-radius:7px}
+.bmenu{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding:8px;background:var(--soft);border-radius:9px;font-size:13px;align-items:center}
+.bmenu button{padding:4px 10px;font-size:12px}
+.blk{padding:8px 12px;border-top:1px solid var(--line);font-size:13px}
+.blk summary{cursor:pointer;color:var(--mute)}
+.blk .row{display:flex;align-items:center;gap:6px;padding:5px 0}
+.blk .row span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blk .row button{padding:2px 8px;font-size:12px}
+
+/* پاسخ اعلان */
+.n.out{background:var(--out);border-color:transparent}
+.rbox{display:flex;gap:6px;margin-top:8px}
+.rbox input{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--soft)}
+.rbox button{padding:6px 12px}
+.nbtns{display:flex;gap:6px;margin-top:6px}
+.nbtns button{padding:4px 10px;font-size:12px}
+
+/* فایل‌ها */
+.fwrap{flex:1;overflow:auto;padding:16px 4%}
+.fsec{max-width:980px;margin:0 auto 18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.fsec h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
+.fsec h3 .sp{flex:1}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--mute);cursor:pointer}
+.drop.over{border-color:var(--acc);background:var(--sel)}
+.frow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.frow:last-child{border-bottom:0}
+.frow .fn{flex:1;min-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.frow .fm{color:var(--mute);font-size:12px}
+.frow button{padding:4px 10px;font-size:12px}
+.prog{height:6px;background:var(--soft);border-radius:4px;overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--acc);width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.tile{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--soft);cursor:pointer}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.tile .vd{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;border-radius:6px;padding:1px 6px}
+.tile .dl{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:8px;padding:3px 7px;font-size:12px;opacity:0;transition:.15s}
+.tile:hover .dl{opacity:1}
+
+/* دوربین */
+.camwrap{flex:1;display:flex;flex-direction:column;min-height:0;padding:12px 16px;gap:10px}
+.camstage{flex:1;min-height:0;background:#000;border-radius:14px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.camstage img{transition:transform .2s;display:block}
+.camstage .msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#cbd5e1;text-align:center;padding:30px;line-height:2;font-size:15px}
+.camstage .live{position:absolute;top:12px;right:12px;background:#dc2626;color:#fff;font-size:12px;border-radius:6px;padding:2px 8px;font-weight:700}
+.camstage .info{position:absolute;bottom:10px;left:12px;color:#e2e8f0;font-size:12px;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 8px;direction:ltr}
+.cambar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
+.cambar select{padding:7px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.cambar button.on{background:#f59e0b;border-color:#f59e0b;color:#111}
+.camstage:fullscreen{border-radius:0}
+.rec{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.6);color:#fff;font-size:13px;border-radius:6px;padding:3px 10px;direction:ltr;font-weight:700}
+.rec i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:6px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+#camAudio.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#camRec.on{background:#dc2626;border-color:#dc2626;color:#fff}
+.tab .recdot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:blink 1s infinite}
+.recopts{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;color:var(--mute)}
+.recopts select{padding:4px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+
+/* صفحه‌ی گوشی */
+.scrwrap{flex:1;display:flex;gap:12px;min-height:0;padding:12px 16px}
+.scrstage{flex:1;min-width:0;background:#0b0f17;border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;outline:none}
+.scrstage:focus{box-shadow:0 0 0 2px var(--acc2) inset}
+.scrstage img{max-width:100%;max-height:100%;display:block;user-select:none;-webkit-user-drag:none;cursor:pointer;border-radius:6px;touch-action:none}
+.scrstage .msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#cbd5e1;text-align:center;padding:30px;line-height:2;font-size:15px;pointer-events:none}
+.scrside{width:200px;display:flex;flex-direction:column;gap:8px;overflow:auto}
+.scrside button,.scrside select{width:100%;text-align:right;padding:9px 12px}
+.scrside .sep{height:1px;background:var(--line);margin:4px 0}
+.scrside small{color:var(--mute);line-height:1.8}
+.tapfx{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #2dd4bf;pointer-events:none;animation:tapfx .45s ease-out forwards}
+@keyframes tapfx{from{transform:scale(.4);opacity:1}to{transform:scale(1.4);opacity:0}}
+@media (max-width:900px){ .scrwrap{flex-direction:column} .scrside{width:auto;flex-direction:row;flex-wrap:wrap} .scrside button,.scrside select{width:auto} }
+
+/* میکروفون */
+.micwrap{flex:1;overflow:auto;padding:24px 16px;display:flex;justify-content:center}
+.miccard{width:min(560px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;text-align:center;align-self:flex-start;box-shadow:var(--shadow)}
+.micicon{font-size:46px;line-height:1}
+.micstat{color:var(--mute);margin:10px 0 16px;min-height:24px;line-height:1.9}
+.meter{height:14px;background:var(--soft);border-radius:8px;overflow:hidden;direction:ltr}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#eab308 70%,#ef4444);transition:width .08s}
+.micbtns{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.micbtns button{padding:11px 18px;font-size:15px}
+#micListen.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#micRec.on{background:#dc2626;border-color:#dc2626;color:#fff}
+.mictime{font-size:22px;font-weight:700;direction:ltr;margin-top:14px;color:#dc2626}
+
+/* کلیپ‌بورد */
+.clipbox textarea{width:100%;min-height:90px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--soft);resize:vertical;font:inherit}
+.citem{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:8px;display:flex;gap:8px;align-items:flex-start}
+.citem pre{flex:1;margin:0;white-space:pre-wrap;word-break:break-word;font:inherit;max-height:120px;overflow:auto}
+.citem small{color:var(--mute);display:block;margin-bottom:3px}
+.sheet .citem pre{direction:rtl;text-align:right;background:none;border:0;padding:0;font-family:inherit;font-size:14px}
+a>button{color:var(--ink)} a>button.pri{color:#fff} a:has(>button){text-decoration:none}
+#ringBtn.on{background:#dc2626;border-color:#dc2626;color:#fff}
+
+/* پنجرهٔ تنظیمات */
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:8;padding:20px}
+.sheet{background:var(--panel);border-radius:16px;width:min(680px,100%);max-height:90vh;overflow:auto;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.sheet h2{margin:0 0 4px;font-size:18px}
+.sheet h3{margin:20px 0 6px;font-size:15px}
+.sheet p,.sheet li{line-height:1.9;color:var(--ink)}
+.sheet .mute{color:var(--mute);font-size:13px}
+.sheet code,.sheet pre{direction:ltr;text-align:left;font-family:Consolas,monospace;font-size:12.5px;background:var(--soft);border-radius:6px}
+.sheet code{padding:1px 6px}
+.sheet pre{padding:10px 12px;overflow:auto;white-space:pre;border:1px solid var(--line);position:relative}
+.keyrow{display:flex;gap:8px;align-items:center}
+.keyrow code{flex:1;padding:8px 10px}
+.okline{color:#15803d;font-weight:600}
+.badline{color:var(--bad);font-weight:600}
+
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:9px 18px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none;z-index:9}
+#toast.on{opacity:.95;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:760px){
+  .side{width:100%;max-width:none}
+  .view .conv{display:none}
+  body.show-conv .view .side{display:none}
+  body.show-conv .view .conv{display:flex}
+  .back{display:inline-block}
+  .msgs{padding:12px}
+  .tabs{margin-inline-start:0}
+  .conn span{display:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="lg" viewBox="0 0 24 24"><path fill="#fff" fill-rule="evenodd" d="M3 4h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm3 3v6h3v2l3-2h6V7z"/></symbol>
+</svg>
+
+<div id="login" class="login hidden">
+  <form class="card" id="loginForm">
+    <div class="logo"><svg width="30" height="30"><use href="#lg"/></svg></div>
+    <h1>پیام‌بین</h1>
+    <p>رمز ۶ رقمی که روی صفحهٔ برنامه در گوشی<br>نمایش داده شده را وارد کنید</p>
+    <input id="pin" inputmode="numeric" autocomplete="off" maxlength="6" autofocus>
+    <button class="pri" type="submit">ورود</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <div class="brand"><div class="logo"><svg width="18" height="18"><use href="#lg"/></svg></div>پیام‌بین</div>
+    <div class="tabs">
+      <button class="tab on" data-tab="sms">پیامک‌ها <span class="badge hidden" id="smsBadge"></span></button>
+      <button class="tab" data-tab="notif">اعلان‌ها <span class="badge hidden" id="notifBadge"></span></button>
+      <button class="tab" data-tab="calls">تماس‌ها <span class="badge hidden" id="callsBadge"></span></button>
+      <button class="tab" data-tab="files">فایل‌ها <span class="badge hidden" id="filesBadge"></span></button>
+      <button class="tab" data-tab="cam">دوربین <span class="recdot hidden" id="recDot"></span></button>
+      <button class="tab" data-tab="mic">میکروفون <span class="recdot hidden" id="micDot"></span></button>
+      <button class="tab" data-tab="screen">صفحه‌ی گوشی</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="otp hidden" id="otpChip" title="آخرین کد تأیید — برای کپی کلیک کنید"><small>کد</small><b id="otpCode"></b><small id="otpFrom"></small></div>
+    <div class="bat hidden" id="bat" title="باتری گوشی"><span id="batTxt"></span><div class="cell"><div class="fill" id="batFill"></div></div><span id="batChg"></span></div>
+    <div class="conn" id="conn"><i class="dot"></i><span id="device">…</span></div>
+    <button class="hbtn" id="clipBtn" title="کلیپ‌بورد مشترک">📋 <span class="badge hidden" id="clipBadge"></span></button>
+    <button class="hbtn" id="ringBtn" title="پیدا کردن گوشی (زنگ با صدای کامل)">📳</button>
+    <button class="hbtn" id="bellBtn" title="اعلان ویندوز">🔕</button>
+    <button class="hbtn" id="setBtn" title="تنظیمات">⚙️</button>
+    <button id="logout" title="خروج">خروج</button>
+  </header>
+  <div class="callbar hidden" id="callBar"></div>
+  <div class="banner hidden" id="banner"></div>
+  <main>
+    <section class="view" id="smsView">
+      <aside class="side">
+        <div class="side-top">
+          <input id="q" placeholder="جستجو… (Enter: جستجو در متن پیام‌ها)">
+          <button id="smsReadAll" class="hidden" title="همهٔ پیامک‌ها خوانده شود">✓ همه</button>
+          <button id="newBtn" title="پیام جدید">+ جدید</button>
+        </div>
+        <div class="list" id="threadList"></div>
+      </aside>
+      <section class="conv">
+        <div class="conv-head" id="convHead"></div>
+        <div class="msgs" id="msgs"><div class="empty">یک گفتگو را از فهرست انتخاب کنید</div></div>
+        <form class="compose hidden" id="compose">
+          <select id="sim" class="hidden" title="سیم‌کارت"></select>
+          <textarea id="body" rows="1" placeholder="نوشتن پیام…  (Ctrl+Enter برای ارسال)"></textarea>
+          <span class="cnt" id="cnt"></span>
+          <button class="pri" id="sendBtn" type="submit">ارسال</button>
+        </form>
+      </section>
+    </section>
+
+    <section class="view hidden" id="notifView">
+      <aside class="side">
+        <div class="side-top"><b style="flex:1">برنامه‌ها</b><button id="clearN">پاک کردن</button></div>
+        <div class="list" id="appList"></div>
+        <details class="blk" id="blkBox"><summary id="blkSum">🚫 مسدودشده‌ها</summary><div id="blkList"></div></details>
+      </aside>
+      <section class="conv">
+        <div class="conv-head" id="nHead"></div>
+        <div class="msgs nlist" id="notifList"></div>
+      </section>
+    </section>
+    <section class="view hidden" id="callsView">
+      <section class="conv">
+        <div class="conv-head"><div class="meta"><div class="nm">تماس‌های اخیر</div><div class="sub" style="direction:rtl" id="callsSub"></div></div></div>
+        <div class="clist" id="callList"></div>
+      </section>
+    </section>
+    <section class="view hidden" id="filesView">
+      <div class="fwrap">
+        <div class="fsec">
+          <h3>📤 فرستادن فایل به گوشی</h3>
+          <div class="drop" id="drop">فایل را اینجا بکشید و رها کنید، یا کلیک کنید<br><small>در گوشی: پوشه‌ی Download/PayamBin</small></div>
+          <input type="file" id="fileIn" multiple class="hidden">
+          <div id="upProg"></div>
+          <div class="fbar hidden" id="inBar"><span class="fm" id="inSum"></span><input type="search" id="inQ" placeholder="جستجوی نام فایل…"><select id="inAge"><option value="0">همه</option><option value="86400000">قدیمی‌تر از ۱ روز</option><option value="604800000">قدیمی‌تر از ۷ روز</option><option value="2592000000">قدیمی‌تر از ۳۰ روز</option></select><button data-clear="in">🧹 پاک کردن فهرست</button></div>
+          <div id="inList"></div>
+        </div>
+        <div class="fsec">
+          <h3>📥 فرستاده‌شده از گوشی <span class="sp"></span></h3>
+          <p class="mute" style="margin:0 0 6px;font-size:13px;color:var(--mute)">در گوشی روی هر فایل یا متن «اشتراک‌گذاری ← ارسال به کامپیوتر» را بزنید.</p>
+          <div class="fbar hidden" id="outBar"><span class="fm" id="outSum"></span><input type="search" id="outQ" placeholder="جستجوی نام فایل…"><select id="outAge"><option value="0">همه</option><option value="86400000">قدیمی‌تر از ۱ روز</option><option value="604800000">قدیمی‌تر از ۷ روز</option><option value="2592000000">قدیمی‌تر از ۳۰ روز</option></select><button data-clear="out">🧹 پاک کردن فهرست</button></div>
+          <div id="outList"></div>
+        </div>
+        <div class="fsec">
+          <h3>🖼 عکس‌ها و ویدیوهای اخیر گوشی <span class="sp"></span><button id="mediaRefresh">تازه کردن</button></h3>
+          <div id="media"></div>
+        </div>
+      </div>
+    </section>
+    <section class="view hidden" id="camView">
+      <div class="camwrap">
+        <div class="camstage" id="camStage">
+          <img id="camImg" alt="">
+          <div class="msg" id="camMsg">دوربین خاموش است</div>
+          <span class="live hidden" id="camLive">● زنده</span>
+          <span class="info hidden" id="camInfo"></span>
+          <span class="rec hidden" id="recBadge"><i></i><span id="recTime">REC 00:00</span></span>
+        </div>
+        <div class="cambar">
+          <button class="pri" id="camStart">▶ روشن کردن دوربین</button>
+          <button id="camFacing" title="دوربین جلو/عقب">🔄 دوربین جلو</button>
+          <button id="camTorch" class="hidden" title="چراغ‌قوه">🔦 چراغ‌قوه</button>
+          <select id="camQuality" title="کیفیت"><option value="low">کیفیت کم (سریع)</option><option value="mid" selected>کیفیت متوسط</option><option value="high">کیفیت بالا</option></select>
+          <select id="camFps" title="فریم در ثانیه"><option value="10">۱۰ فریم</option><option value="15">۱۵ فریم</option><option value="24" selected>۲۴ فریم</option><option value="30">۳۰ فریم</option></select>
+          <button id="camRotate" title="چرخاندن">↻ چرخش</button>
+          <button id="camSnap" title="ذخیره‌ی عکس">📸 عکس</button>
+          <button id="camFull" title="تمام‌صفحه">⛶ تمام‌صفحه</button>
+          <button id="camAudio" title="شنیدن زنده‌ی صدای گوشی">🔇 صدا</button>
+          <button id="camRec" title="ضبط روی همین کامپیوتر">⏺ ضبط</button>
+          <button id="camWebcam" title="استفاده از دوربین گوشی به‌عنوان وب‌کم ویندوز (Zoom، Skype، Meet، بله و…)">🎥 وب‌کم</button>
+        </div>
+        <div class="recopts">
+          <label>ذخیره‌ی خودکار هر <select id="recSeg"><option value="5">۵ دقیقه</option><option value="10" selected>۱۰ دقیقه</option><option value="30">۳۰ دقیقه</option><option value="0">فقط در پایان</option></select></label>
+          <label><input type="checkbox" id="recStamp" checked> تاریخ و ساعت روی فیلم</label>
+          <label><input type="checkbox" id="recAudio" checked> ضبط صدا</label>
+          <span id="recSaved"></span>
+        </div>
+      </div>
+    </section>
+    <section class="view hidden" id="screenView">
+      <div class="scrwrap">
+        <div class="scrstage" id="scrStage" tabindex="0">
+          <img id="scrImg" alt="" draggable="false">
+          <div class="msg" id="scrMsg">صفحه‌ی گوشی به اشتراک گذاشته نشده</div>
+        </div>
+        <div class="scrside">
+          <button class="pri" id="scrStart">▶ شروع</button>
+          <div class="sep"></div>
+          <button data-g="back">◀ برگشت</button>
+          <button data-g="home">⌂ خانه</button>
+          <button data-g="recents">▢ برنامه‌های اخیر</button>
+          <button data-g="notifications">🔔 اعلان‌ها</button>
+          <button data-g="quick">⚙ تنظیمات سریع</button>
+          <button id="scrWake">💡 روشن کردن صفحه</button>
+          <button data-g="lock">🔒 قفل صفحه</button>
+          <div class="sep"></div>
+          <select id="scrQuality"><option value="low">کیفیت کم</option><option value="mid" selected>کیفیت متوسط</option><option value="high">کیفیت بالا</option></select>
+          <select id="scrFps"><option value="8">۸ فریم</option><option value="15" selected>۱۵ فریم</option><option value="24">۲۴ فریم</option><option value="30">۳۰ فریم</option></select>
+          <button id="scrFull">⛶ تمام‌صفحه</button>
+          <label style="display:flex;gap:6px;align-items:center;font-size:13px"><input type="checkbox" id="scrDim" checked> نور گوشی کم شود</label>
+          <div class="sep"></div>
+          <small>کلیک = لمس · نگه داشتن = لمس طولانی · کشیدن = سوایپ · چرخ ماوس = اسکرول · کلیک راست = برگشت · Esc = برگشت · Ctrl+V = چسباندن متن</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="view hidden" id="micView">
+      <div class="micwrap">
+        <div class="miccard">
+          <div class="micicon">🎙</div>
+          <h2 style="margin:8px 0 0;font-size:18px">میکروفون گوشی</h2>
+          <div class="micstat" id="micStat">خاموش</div>
+          <div class="meter"><i id="micMeter"></i></div>
+          <div class="micbtns">
+            <button id="micListen">🔊 گوش دادن زنده</button>
+            <button id="micRec">⏺ ضبط صدا</button>
+          </div>
+          <div class="mictime hidden" id="micTime">REC 00:00:00</div>
+          <div class="recopts" style="margin-top:14px">
+            <label>بلندی پخش <input type="range" id="micVol" min="0" max="150" value="80" style="vertical-align:middle"></label>
+            <label title="کاهش نویز سخت‌افزاری گوشی؛ روی ضبط هم اثر دارد"><input type="checkbox" id="micNs"> کاهش نویز گوشی</label>
+          </div>
+          <p class="mute" style="margin-top:12px;font-size:13px;color:var(--mute)">گوش دادن و ضبط مستقل‌اند: می‌توانید فقط ضبط کنید بدون اینکه صدایی از کامپیوتر پخش شود.<br>
+          ⚠️ اگر گوشی نزدیک بلندگوی کامپیوتر است، صدای بلندگو دوباره وارد میکروفون می‌شود و صدای تیز (فیدبک) می‌سازد؛ با هدفون گوش دهید یا گوشی را دورتر بگذارید.</p>
+          <div class="recopts">
+            <label>ذخیره‌ی خودکار هر <select id="micSeg"><option value="10">۱۰ دقیقه</option><option value="30" selected>۳۰ دقیقه</option><option value="60">۶۰ دقیقه</option><option value="0">فقط در پایان</option></select></label>
+            <span id="micSaved"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal hidden" id="wcModal">
+  <div class="sheet wcbox">
+    <div style="display:flex;align-items:center"><h2 style="flex:1">🎥 دوربین گوشی به‌عنوان وب‌کم</h2><button id="wcClose">بستن</button></div>
+    <p class="mute">تصویر دوربین گوشی در ویندوز به شکل یک وب‌کم واقعی دیده می‌شود و در Zoom، Skype، Google Meet، اسکای‌روم، بله و هر برنامه‌ی دیگری قابل انتخاب است. این کار با برنامه‌ی رایگان <b>OBS Studio</b> انجام می‌شود (فقط یک بار تنظیم لازم دارد).</p>
+    <div class="wcopts">
+      <label>دوربین <select id="wcFacing"><option value="front">جلو (سلفی)</option><option value="back">عقب</option></select></label>
+      <label>کیفیت <select id="wcQ"><option value="mid">متوسط</option><option value="high" selected>بالا</option><option value="low">کم</option></select></label>
+      <label>فریم <select id="wcFps"><option value="15">۱۵</option><option value="24">۲۴</option><option value="30" selected>۳۰</option></select></label>
+      <label>قاب <select id="wcFit"><option value="blur">کامل + پس‌زمینه‌ی محو</option><option value="cover">پر کردن (برش لبه‌ها)</option><option value="contain">کامل + حاشیه‌ی سیاه</option></select></label>
+      <label>چرخش <select id="wcRot"><option value="0">خودکار</option><option value="90">۹۰°</option><option value="180">۱۸۰°</option><option value="270">۲۷۰°</option></select></label>
+      <label><input type="checkbox" id="wcMirror"> آینه‌ای</label>
+    </div>
+    <div class="wclink"><input id="wcUrl" readonly dir="ltr"><button class="pri" id="wcCopy">کپی لینک</button><button id="wcTest">پیش‌نمایش</button></div>
+    <div class="mute" style="font-size:12px;margin-top:4px">این لینک بدون رمز کار می‌کند؛ فقط در OBS بگذارید. <a href="#" id="wcNewKey">ساختن لینک جدید</a> (لینک قبلی از کار می‌افتد)</div>
+    <h3>راه‌اندازی (یک بار)</h3>
+    <ol class="wcsteps">
+      <li><b>OBS Studio</b> را نصب کنید (رایگان، از obsproject.com). روی سیستم بدون اینترنت، فایل نصب را با یک کامپیوتر دیگر بگیرید و بیاورید؛ می‌توانید از همین پیام‌بین هم منتقلش کنید.</li>
+      <li>در OBS، پایین در بخش <b>Sources</b> روی <b>+</b> بزنید ← <b>Browser</b> ← یک نام بدهید ← OK.</li>
+      <li>در کادر <b>URL</b> لینک بالا را Paste کنید، <b>Width</b> را <code>1280</code> و <b>Height</b> را <code>720</code> بگذارید ← OK.</li>
+      <li>سمت راست پایین، در بخش <b>Controls</b> روی <b>Start Virtual Camera</b> بزنید.</li>
+      <li>در Zoom / Skype / Meet / بله، از تنظیمات تصویر، دوربین <b>OBS Virtual Camera</b> را انتخاب کنید.</li>
+    </ol>
+    <div class="wctips">
+      💡 دوربین گوشی با باز شدن OBS خودکار روشن می‌شود. برای اینکه لازم نباشد روی گوشی تأیید کنید، در برنامه‌ی پیام‌بین روی گوشی ← تنظیمات، <b>«همیشه آماده»</b> را روشن کنید.<br>
+      💡 گوشی را روی پایه یا تکیه‌گاه بگذارید و به شارژ بزنید. دوربین عقب کیفیت خیلی بهتری دارد.<br>
+      💡 صدای جلسه از میکروفون خود کامپیوتر (یا هدست) گرفته می‌شود.<br>
+      💡 بعد از هر تغییر گزینه‌های بالا، لینک جدید را دوباره در OBS بگذارید (روی Browser دوبار کلیک ← URL).
+    </div>
+  </div>
+</div>
+<div class="modal hidden" id="clipModal">
+  <div class="sheet clipbox">
+    <div style="display:flex;align-items:center"><h2 style="flex:1">📋 کلیپ‌بورد مشترک</h2><button id="closeClip">بستن</button></div>
+    <p class="mute">متن را بنویسید یا Paste کنید تا در کلیپ‌بورد گوشی قرار بگیرد.</p>
+    <textarea id="clipText" placeholder="متن…"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="pri" id="clipSend">ارسال به گوشی</button></div>
+    <h3>تاریخچه</h3>
+    <div id="clipList"></div>
+  </div>
+</div>
+<input type="file" id="attachIn" class="hidden">
+
+<div class="modal hidden" id="modal">
+  <div class="sheet">
+    <div style="display:flex;align-items:center"><h2 style="flex:1">تنظیمات</h2><button id="closeModal">بستن</button></div>
+
+    <h3>🔔 اعلان ویندوز</h3>
+    <div id="notifHelp"></div>
+
+    <h3>🌐 آدرس</h3>
+    <div id="addrHelp"></div>
+
+    <h3>🌐 اشتراک اینترنت گوشی</h3>
+    <div id="proxyHelp"></div>
+
+    <h3>🩺 گزارش عیب‌یابی</h3>
+    <p class="mute">رویدادهای گوشی (خاموش/روشن شدن صفحه، حالت چرت، قطع وای‌فای، قطع دسترسی اعلان) با ساعت. <a href="/api/diag" target="_blank">نمایش گزارش</a></p>
+
+    <h3>🔑 API رمز پویا (برای اسکریپت‌ها)</h3>
+    <p class="mute">آخرین کد تأییدی که با پیامک یا اعلان (بله، تلگرام و …) رسیده را برمی‌گرداند. اسکریپت پرکردن خودکار شما می‌تواند مستقیم از این آدرس کد را بگیرد.</p>
+    <div class="keyrow"><code id="apiKey">…</code><button id="copyKey">کپی</button><button id="newKey">کلید جدید</button></div>
+    <p class="mute" style="margin-top:10px">پارامترها: <code>max_age</code> = حداکثر عمر کد به ثانیه (پیش‌فرض ۱۸۰) · <code>since</code> = فقط کدهای جدیدتر از این زمان (میلی‌ثانیه) · <code>wait</code> = تا چند ثانیه منتظر کد جدید بماند (حداکثر ۶۰)</p>
+    <div id="apiExamples"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const faNum = n => Number(n).toLocaleString('fa-IR');
+const toLatin = s => String(s).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const normNum = s => toLatin(s).replace(/[^\d+]/g, '').replace(/^\+98/, '0').replace(/^0098/, '0');
+
+const L = 'fa-IR-u-ca-persian';
+const fTime = new Intl.DateTimeFormat(L, {hour:'2-digit', minute:'2-digit'});
+const fDay  = new Intl.DateTimeFormat(L, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+const fShort= new Intl.DateTimeFormat(L, {day:'numeric', month:'short'});
+const fFull = new Intl.DateTimeFormat(L, {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+const sameDay = (a, b) => a.toDateString() === b.toDateString();
+function when(ts) {
+  const d = new Date(ts), now = new Date();
+  if (sameDay(d, now)) return fTime.format(d);
+  const y = new Date(now); y.setDate(now.getDate() - 1);
+  if (sameDay(d, y)) return 'دیروز';
+  return fShort.format(d);
+}
+function dayLabel(d) {
+  const now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+  if (sameDay(d, now)) return 'امروز';
+  if (sameDay(d, y)) return 'دیروز';
+  const p = {}; fDay.formatToParts(d).forEach(x => p[x.type] = x.value);
+  return `${p.weekday} ${p.day} ${p.month} ${p.year}`;
+}
+
+const COLORS = ['#0f766e','#2563eb','#7c3aed','#db2777','#ea580c','#16a34a','#0891b2','#9333ea','#c2410c','#4f46e5'];
+const colorOf = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0; return COLORS[Math.abs(h) % COLORS.length]; };
+const initial = t => { const n = (t.name || '').trim(); if (n) return esc(n[0]); return /\d/.test(t.address||'') ? '#' : esc((t.address||'?')[0]); };
+
+/* متن با لینک و کد قابل کپی */
+function rich(t) {
+  return String(t ?? '').split(/(https?:\/\/[^\s]+)/g).map((p, i) => i % 2
+    ? `<a href="${esc(p)}" target="_blank" rel="noopener noreferrer">${esc(p)}</a>`
+    : esc(p).replace(/(^|[^0-9۰-۹٠-٩&#])([0-9۰-۹٠-٩]{4,8})(?![0-9۰-۹٠-٩])/g,
+        (m, a, c) => `${a}<span class="code" data-c="${c}" title="برای کپی کلیک کنید">${c}</span>`)
+  ).join('');
+}
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1800);
+}
+function copy(s) {
+  const ta = document.createElement('textarea');
+  ta.value = s; ta.style.cssText = 'position:fixed;opacity:0;top:0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  ta.remove();
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(s).catch(() => {});
+  toast('کپی شد: ' + s);
+}
+document.addEventListener('click', e => {
+  const c = e.target.closest('.code');
+  if (c) { e.preventDefault(); copy(toLatin(c.dataset.c)); }
+});
+
+/* ارتباط با گوشی */
+class AuthError extends Error {}
+async function api(path, opts = {}) {
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), path.includes('wait=') ? 70000 : 10000);
+  let r;
+  try {
+    r = await fetch(path, Object.assign({credentials: 'same-origin', cache: 'no-store', signal: ctl.signal,
+      headers: {'Content-Type': 'application/json'}}, opts));
+  } finally { clearTimeout(to); }
+  if (r.status === 401 && path !== '/api/login') { showLogin(); throw new AuthError('auth'); }
+  let j = null; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+  return j;
+}
+
+/* هشدار پیام جدید */
+let audioCtx = null, unseen = 0;
+function beep() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.4);
+  } catch (e) {}
+}
+/* اعلان ویندوز */
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+function notifState() {
+  if (!('Notification' in window)) return 'unsupported';
+  if (!window.isSecureContext) return 'insecure';
+  return Notification.permission; // granted | denied | default
+}
+const notifOn = () => notifState() === 'granted' && lsGet('pb_notif') !== '0';
+function renderBell() {
+  const on = notifOn();
+  $('#bellBtn').textContent = on ? '🔔' : '🔕';
+  $('#bellBtn').title = on ? 'اعلان ویندوز روشن است (کلیک برای خاموش کردن)' : 'اعلان ویندوز خاموش است';
+}
+function winNotify(title, body, tag, onclick) {
+  if (!notifOn()) return false;
+  try {
+    const n = new Notification(title, {body: (body || '').slice(0, 300), tag: tag || undefined, dir: 'rtl', lang: 'fa', renotify: !!tag});
+    n.onclick = () => { window.focus(); if (onclick) onclick(); n.close(); };
+    return true;
+  } catch (e) { return false; }
+}
+$('#bellBtn').onclick = async () => {
+  const s = notifState();
+  if (s === 'granted') { lsSet('pb_notif', notifOn() ? '0' : '1'); renderBell(); toast(notifOn() ? 'اعلان ویندوز روشن شد' : 'اعلان ویندوز خاموش شد'); return; }
+  if (s === 'default') { await Notification.requestPermission(); lsSet('pb_notif', '1'); renderBell(); if (notifOn()) winNotify('پیام‌بین', 'اعلان ویندوز فعال شد ✓'); return; }
+  openSettings();
+};
+
+function alertNew(n, label, body, onclick, tag) {
+  beep();
+  const away = document.hidden || !document.hasFocus();
+  if (away) winNotify(label, body, tag, onclick);
+  if (document.hidden) { unseen += n; document.title = `(${faNum(unseen)}) ${label} — پیام‌بین`; }
+  else if (!away) toast(label);
+}
+
+/* تشخیص کد (همان منطق برنامهٔ گوشی) */
+const OTP_RE = /(کد|رمز|پویا|تایید|تأیید|password|passcode|code|otp|pass|pin|verification)|(مبلغ|مانده|موجودی|ریال|تومان|حساب|شماره|تاریخ|ساعت|پیگیری|رهگیری|سفارش|مرسوله|بارکد|amount|balance|account|date|time|ref|tracking)|(خرید|انتقال|برداشت|واریز|کارت|card|دوم|اینترنتی|یکبار|مصرف)/gi;
+function findCode(text) {
+  const t = toLatin(text || '').normalize('NFKC').replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/ة/g, 'ه')
+    .replace(/[​-‏‪-‮⁦-⁩﻿ـ]/g, '');
+  const kws = [...t.matchAll(OTP_RE)].map(m => ({s: m.index, e: m.index + m[0].length, ty: m[1] ? 1 : m[2] ? 2 : 3}));
+  if (!kws.some(k => k.ty === 1)) return null;
+  const hasNum = (a, b) => /\d/.test(t.slice(a, b));
+  let best = null, bestScore = Infinity;
+  for (const m of t.matchAll(/(?<![\d,./٫٬*\-])(?<!\d[:.])(\d{4,8})(?![\d,/٫٬*]|[.:]\d)/g)) {
+    const s = m.index, e = s + m[1].length, after = t.slice(e), before = t.slice(0, s);
+    if (/^\s*[-_]?\s*\d{1,2}:\d{2}/.test(after) || /\d{1,2}:\d{2}\s*[-_]?\s*$/.test(before)) continue;
+    if (/^\s*(ریال|تومان|rial|irr)/i.test(after)) continue;
+    let idx = -1; kws.forEach((k, i) => { if (k.e <= s) idx = i; });
+    let otp = false, hard = false, gap = -1;
+    if (idx >= 0 && s - kws[idx].e <= 30 && !hasNum(kws[idx].e, s)) {
+      gap = s - kws[idx].e; let edge = kws[idx].s;
+      for (let i = idx; i >= 0; i--) {
+        const k = kws[i];
+        if (i < idx && (edge - k.e > 12 || hasNum(k.e, edge))) break;
+        if (k.ty === 1) otp = true; else if (k.ty === 2) hard = true;
+        edge = k.s;
+      }
+    }
+    if (hard) continue;
+    let score = -1;
+    if (otp) score = gap;
+    else for (const k of kws) {
+      if (k.s < e) continue;
+      if (k.s - e > 30 || hasNum(e, k.s)) break;
+      if (k.ty === 1) { score = 100 + k.s - e; break; }
+      if (k.ty === 2) break;
+    }
+    if (score >= 0 && score < bestScore) { bestScore = score; best = m[1]; }
+  }
+  return best;
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { unseen = 0; document.title = 'پیام‌بین'; } });
+/* لوگو در تب مرورگر؛ وقتی پیام نخوانده هست یک نقطه‌ی قرمز رویش می‌آید */
+let favSvg = null, favDot = null;
+async function updateFavicon() {
+  const n = (st.threads || []).reduce((a, t) => a + (t.unread || 0), 0) + ((st.notifs || []).filter(x => !x.read && !x.out).length);
+  const dot = n > 0;
+  if (dot === favDot) return;
+  favDot = dot;
+  if (!favSvg) { try { favSvg = await (await fetch('/favicon.svg')).text(); } catch (e) { return; } }
+  const svg = dot ? favSvg.replace('</svg>', '<circle cx="86" cy="22" r="17" fill="#ef4444" stroke="#fff" stroke-width="5"/></svg>') : favSvg;
+  $('#favicon').href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+setInterval(updateFavicon, 2000);
+
+/* ---------- وضعیت ---------- */
+const st = {
+  tab: 'sms', ver: {sms: null, notif: null},
+  threads: [], cur: null, sims: [], search: null,
+  baseSms: null, baseNotif: null, notifApp: '', notifs: [], apps: [], seenNotif: 0,
+  perms: {}, polling: false,
+  calls: [], baseMiss: null, seenMiss: 0, ringKey: '', lowBatWarned: false, addr: null, port: 8080,
+};
+st.ver.calls = null;
+
+function showLogin() {
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
+  $('#pin').value = ''; setTimeout(() => $('#pin').focus(), 50);
+}
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('#loginErr').textContent = '';
+  try {
+    await api('/api/login', {method: 'POST', body: JSON.stringify({pin: toLatin($('#pin').value)})});
+    start();
+  } catch (err) {
+    $('#loginErr').textContent = err.message === 'too many attempts' ? 'تلاش زیاد؛ یک دقیقه صبر کنید' : 'رمز اشتباه است';
+    $('#pin').select();
+  }
+});
+$('#logout').onclick = async () => { try { await api('/api/logout', {method: 'POST', body: '{}'}); } catch (e) {} showLogin(); };
+
+async function start() {
+  // اگر با payambin.local باز شده، به IP مستقیم برو (ارتباط پایدارتر وقتی صفحهٔ گوشی خاموش است)
+  if (/\.local$/i.test(location.hostname)) {
+    try { const h = await api('/api/handoff'); if (h && h.url) { location.replace(h.url); return; } } catch (e) {}
+  }
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  try { st.sims = await api('/api/sims'); } catch (e) { if (e instanceof AuthError) return; }
+  renderSims();
+  if (!st.polling) { st.polling = true; poll(); }
+}
+
+async function poll() {
+  if ($('#app').classList.contains('hidden')) { st.polling = false; return; }
+  try {
+    const s = await api('/api/state');
+    if (st.offSince) {
+      if (st.offWarned) winNotify('✅ پیام‌بین دوباره وصل شد', 'ارتباط با گوشی برقرار شد', 'conn');
+      st.offSince = 0; st.offWarned = false;
+    }
+    $('#conn').classList.remove('off'); $('#device').textContent = s.device;
+    st.perms = s.perms; renderBanner();
+    st.addr = s.addr; if (s.addr) st.port = s.addr.port;
+    renderBattery(s.battery); renderCall(s.call); renderOtp(s.otp);
+    if (s.sms !== st.ver.sms) { st.ver.sms = s.sms; await refreshSms(); }
+    if (s.notif !== st.ver.notif) { st.ver.notif = s.notif; await refreshNotifs(); }
+    if (s.calls !== st.ver.calls) { st.ver.calls = s.calls; await refreshCalls(); }
+    if (s.files !== st.ver.files) { st.ver.files = s.files; await refreshFiles(); }
+    if (s.clip !== st.ver.clip) { st.ver.clip = s.clip; await refreshClip(); }
+    if (s.cam && (st.tab === 'cam' || s.cam.state !== st.cam.state)) renderCam(s.cam);
+    if (s.screen && (st.tab === 'screen' || s.screen.state !== st.scr.state)) renderScr(s.screen);
+    if (s.cam && document.activeElement !== $('#micNs')) $('#micNs').checked = !!s.cam.noiseSuppress;
+    $('#ringBtn').classList.toggle('on', !!s.ringing);
+    $('#ringBtn').textContent = s.ringing ? '🔕 قطع زنگ' : '📳';
+  } catch (e) {
+    if (e instanceof AuthError) { st.polling = false; return; }
+    $('#conn').classList.add('off'); $('#device').textContent = 'گوشی در دسترس نیست';
+    if (!st.offSince) st.offSince = Date.now();
+    else if (!st.offWarned && Date.now() - st.offSince > 30000) {
+      st.offWarned = true;
+      if (!/\.local$/i.test(location.hostname)) {
+        $('#banner').innerHTML = `⚠️ ارتباط با گوشی قطع است. اگر IP گوشی عوض شده، آدرس <a href="http://payambin.local:${st.port}/">payambin.local:${st.port}</a> را باز کنید تا به IP جدید منتقل شوید.`;
+        $('#banner').classList.remove('hidden');
+      }
+      winNotify('⚠️ ارتباط با گوشی قطع شد', st.perms.battery === false
+        ? 'بهینه‌سازی باتری برای پیام‌بین روشن است؛ آن را در گوشی خاموش کنید'
+        : 'وای‌فای گوشی یا سرور پیام‌بین را بررسی کنید', 'conn');
+    }
+  }
+  setTimeout(poll, 3000);
+}
+
+function renderBanner() {
+  const p = st.perms, msgs = [];
+  if (p.battery === false) msgs.push('🔋 «بهینه‌سازی باتری» برای پیام‌بین روشن است؛ به همین دلیل وقتی صفحهٔ گوشی چند دقیقه خاموش بماند ارتباط قطع می‌شود. در برنامهٔ گوشی دکمهٔ «جلوگیری از بسته شدن توسط بهینه‌ساز باتری» را بزنید' + (/xiaomi|redmi|poco/i.test(p.maker || '') ? ' و در شیائومی Autostart را روشن و صرفه‌جویی باتری را روی No restrictions بگذارید.' : '.'));
+  if (p.readSms === false) msgs.push('⚠️ مجوز «خواندن پیامک» روی گوشی داده نشده — برنامه را روی گوشی باز کنید و دکمهٔ مجوزها را بزنید.');
+  if (st.tab === 'notif' && p.notif === false) msgs.push('⚠️ «دسترسی به اعلان‌ها» فعال نیست؛ پیام‌های بله، تلگرام، واتساپ و … اینجا نمی‌آیند.');
+  if (st.tab === 'sms' && p.sendSms === false) msgs.push('ارسال پیامک از کامپیوتر غیرفعال است (مجوز ارسال پیامک داده نشده).');
+  $('#banner').innerHTML = msgs.join('<br>');
+  $('#banner').classList.toggle('hidden', !msgs.length);
+}
+
+/* ---------- تب‌ها ---------- */
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+function setTab(t) {
+  st.tab = t;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  $('#smsView').classList.toggle('hidden', t !== 'sms');
+  $('#notifView').classList.toggle('hidden', t !== 'notif');
+  $('#callsView').classList.toggle('hidden', t !== 'calls');
+  $('#filesView').classList.toggle('hidden', t !== 'files');
+  $('#camView').classList.toggle('hidden', t !== 'cam');
+  $('#micView').classList.toggle('hidden', t !== 'mic');
+  $('#screenView').classList.toggle('hidden', t !== 'screen');
+  if (t === 'screen') scrEnter(); else scrLeave();
+  if (t === 'mic') micMeterLoop();
+  if (t === 'cam') camEnter(); else camLeave();
+  if (t === 'files') { st.seenFiles = st.outCount; renderFilesBadge(); if (!st.mediaLoaded) loadMedia(); }
+  document.body.classList.remove('show-conv');
+  if (t === 'notif') renderNotifBadge();
+  if (t === 'calls') { st.seenMiss = maxMissId(); renderCallsBadge(); }
+  renderBanner();
+}
+
+/* ---------- پیامک ---------- */
+async function refreshSms() {
+  let list;
+  try { list = await api('/api/threads'); } catch (e) { if (!(e instanceof AuthError)) renderThreadsError(e); return; }
+  st.threads = list;
+  // تشخیص پیام دریافتی جدید
+  const maxIn = list.reduce((m, t) => t.lastType === 1 ? Math.max(m, t.lastId) : m, 0);
+  if (st.baseSms !== null && maxIn > st.baseSms) {
+    const t = list.find(x => x.lastId === maxIn);
+    const who = t ? (t.name || t.address) : '';
+    const code = t ? findCode(t.snippet) : null;
+    alertNew(1, code ? `🔑 کد ${code} — ${who}` : 'پیامک جدید از ' + who, t ? t.snippet : '',
+      () => { setTab('sms'); if (t) openThread(t); }, 'sms');
+  }
+  st.baseSms = Math.max(st.baseSms || 0, maxIn);
+  renderSmsBadge();
+
+  // گفتگوی جدیدی که از کامپیوتر شروع شده بود
+  if (st.cur && st.cur.thread == null) {
+    const t = list.find(x => normNum(x.address) === normNum(st.cur.address));
+    if (t) st.cur = t;
+  }
+  if (!st.search) renderThreads();
+  if (st.cur && st.cur.thread != null) {
+    // پیامک تازه در گفتگویی که همین الان باز است = خوانده شد
+    const cur = list.find(x => x.thread === st.cur.thread);
+    if (cur && cur.unread && st.tab === 'sms' && !document.hidden && document.hasFocus()) smsMarkRead(cur);
+    loadMessages(false);
+  }
+}
+
+function renderSmsBadge() {
+  const unread = st.threads.reduce((s, t) => s + (t.unread || 0), 0);
+  $('#smsBadge').textContent = faNum(unread); $('#smsBadge').classList.toggle('hidden', !unread);
+  $('#smsReadAll').classList.toggle('hidden', !unread);
+}
+async function smsMarkRead(t) {
+  // باز کردن گفتگو یعنی خوانده شد
+  if (!t || t.thread == null || !t.unread) return;
+  t.unread = 0; renderSmsBadge(); renderThreads();
+  try { await api('/api/sms/read', {method: 'POST', body: JSON.stringify({thread: t.thread, address: t.address, phone: readSync()})}); } catch (e) {}
+}
+$('#smsReadAll').onclick = async () => {
+  st.threads.forEach(t => t.unread = 0); renderSmsBadge(); renderThreads();
+  try { await api('/api/sms/read', {method: 'POST', body: JSON.stringify({all: true, phone: readSync()})}); toast('همهٔ پیامک‌ها خوانده شد'); } catch (e) {}
+};
+
+function renderThreadsError(e) {
+  $('#threadList').innerHTML = `<div class="empty" style="padding:30px">${e.message.includes('READ_SMS') ? 'مجوز خواندن پیامک داده نشده' : 'خطا: ' + esc(e.message)}</div>`;
+}
+
+function renderThreads() {
+  if (st.search) return;
+  const q = $('#q').value.trim(), qn = toLatin(q).toLowerCase();
+  const list = q ? st.threads.filter(t => ((t.name || '') + ' ' + t.address + ' ' + t.snippet).toLowerCase().includes(qn) || toLatin(t.address).includes(qn)) : st.threads;
+  if (!list.length) { $('#threadList').innerHTML = `<div class="empty" style="padding:30px">${q ? 'موردی پیدا نشد — Enter بزنید تا در متن همهٔ پیام‌ها جستجو شود' : 'پیامکی نیست'}</div>`; return; }
+  $('#threadList').innerHTML = list.map(t => `
+    <div class="item ${t.unread ? 'unread' : ''} ${st.cur && st.cur.thread === t.thread ? 'sel' : ''}" data-t="${t.thread}">
+      <div class="av" style="background:${colorOf(t.address)}">${initial(t)}</div>
+      <div class="meta">
+        <div class="row1"><span class="nm">${esc(t.name || t.address)}</span><span class="tm">${when(t.date)}</span></div>
+        <div class="row1"><span class="sn" style="flex:1">${t.lastType !== 1 ? 'شما: ' : ''}${esc(t.snippet)}</span>${t.unread ? `<span class="badge">${faNum(t.unread)}</span>` : ''}</div>
+      </div>
+    </div>`).join('');
+}
+$('#threadList').addEventListener('click', e => {
+  const it = e.target.closest('.item'); if (!it) return;
+  if (it.dataset.t) {
+    const t = st.threads.find(x => String(x.thread) === it.dataset.t) ||
+              (st.search || []).map(m => ({thread: m.thread, address: m.address, name: m.name})).find(x => String(x.thread) === it.dataset.t);
+    if (t) openThread(t);
+  }
+});
+
+function openThread(t) {
+  st.cur = t;
+  if (!document.hidden) smsMarkRead(t);
+  document.body.classList.add('show-conv');
+  if (!st.search) renderThreads();
+  else document.querySelectorAll('#threadList .item').forEach(i => i.classList.toggle('sel', i.dataset.t === String(t.thread)));
+  renderConvHead();
+  $('#compose').classList.remove('hidden');
+  $('#msgs').innerHTML = t.thread == null ? '<div class="empty">گفتگوی جدید — پیام خود را بنویسید</div>' : '<div class="empty">در حال بارگذاری…</div>';
+  if (t.thread != null) loadMessages(true);
+  $('#body').focus();
+}
+
+function renderConvHead() {
+  const t = st.cur;
+  $('#convHead').innerHTML = `
+    <button class="back" id="backBtn">→</button>
+    <div class="av" style="background:${colorOf(t.address)}">${initial(t)}</div>
+    <div class="meta"><div class="nm">${esc(t.name || t.address)}</div>${t.name ? `<div class="sub">${esc(t.address)}</div>` : ''}</div>
+    ${waLink(t.address) ? `<a href="${waLink(t.address)}" target="_blank" rel="noopener"><button title="گفتگوی این شماره در واتس‌اپ وب">واتس‌اپ وب</button></a>` : ''}
+    <button id="copyNum" title="کپی شماره">کپی شماره</button>`;
+  $('#backBtn').onclick = () => document.body.classList.remove('show-conv');
+  $('#copyNum').onclick = () => copy(t.address);
+}
+
+let loadingMsgs = false;
+async function loadMessages(jump) {
+  if (loadingMsgs) return; loadingMsgs = true;
+  const t = st.cur, box = $('#msgs');
+  try {
+    const msgs = await api('/api/messages?thread=' + encodeURIComponent(t.thread));
+    if (st.cur !== t) return;
+    const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+    const simSlot = {}; st.sims.forEach(s => simSlot[s.id] = s.slot);
+    let lastDay = '', html = '';
+    st.curMsgs = msgs;
+    for (const [i, m] of msgs.entries()) {
+      const d = new Date(m.date), dk = d.toDateString();
+      if (dk !== lastDay) { html += `<div class="day">${dayLabel(d)}</div>`; lastDay = dk; }
+      const out = m.type !== 1;
+      let stat = '';
+      if (m.type === 5) stat = '<span class="fail">ارسال نشد</span>';
+      else if (m.type === 4 || m.type === 6) stat = '<span>در حال ارسال…</span>';
+      const sim = st.sims.length > 1 && simSlot[m.sub] ? `<span>سیم ${faNum(simSlot[m.sub])}</span>` : '';
+      html += `<div class="b ${out ? 'out' : 'in'}" data-i="${i}">${rich(m.body)}<div class="ft">${stat}${sim}<span>${fTime.format(d)}</span></div></div>`;
+    }
+    box.innerHTML = html || '<div class="empty">پیامی نیست</div>';
+    if (jump || nearBottom) box.scrollTop = box.scrollHeight;
+  } catch (e) {
+    if (!(e instanceof AuthError)) box.innerHTML = `<div class="empty">خطا: ${esc(e.message)}</div>`;
+  } finally { loadingMsgs = false; }
+}
+
+function renderSims() {
+  const s = $('#sim');
+  s.innerHTML = st.sims.map(x => `<option value="${x.id}">سیم ${faNum(x.slot)} – ${esc(x.carrier || x.name)}</option>`).join('');
+  s.classList.toggle('hidden', st.sims.length < 2);
+}
+
+/* شمارش پیامک (۷۰ نویسه فارسی / ۱۶۰ لاتین) */
+function smsCount(text) {
+  if (!text) return '';
+  const uni = /[^\x00-\x7F]/.test(text), n = [...text].length;
+  const one = uni ? 70 : 160, multi = uni ? 67 : 153;
+  const parts = n <= one ? 1 : Math.ceil(n / multi);
+  return `${faNum(n)} / ${faNum(parts)}`;
+}
+const bodyEl = $('#body');
+bodyEl.addEventListener('input', () => {
+  bodyEl.style.height = 'auto'; bodyEl.style.height = Math.min(bodyEl.scrollHeight, 160) + 'px';
+  $('#cnt').textContent = smsCount(bodyEl.value);
+});
+bodyEl.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('#compose').requestSubmit(); } });
+
+$('#compose').addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = bodyEl.value;
+  if (!text.trim() || !st.cur) return;
+  const btn = $('#sendBtn'); btn.disabled = true;
+  try {
+    const sub = st.sims.length > 1 ? Number($('#sim').value) : -1;
+    await api('/api/send', {method: 'POST', body: JSON.stringify({address: st.cur.address, body: text, sub})});
+    bodyEl.value = ''; bodyEl.dispatchEvent(new Event('input'));
+    toast('ارسال شد');
+    setTimeout(refreshSms, 1200);
+  } catch (err) {
+    if (!(err instanceof AuthError)) toast('ارسال نشد: ' + err.message);
+  } finally { btn.disabled = false; bodyEl.focus(); }
+});
+
+$('#newBtn').onclick = () => {
+  const n = prompt('شمارهٔ گیرنده:');
+  if (!n || !normNum(n)) return;
+  const num = toLatin(n).trim();
+  const ex = st.threads.find(t => normNum(t.address) === normNum(num));
+  openThread(ex || {thread: null, address: num, name: null});
+};
+
+/* جستجو */
+let searchTimer;
+$('#q').addEventListener('input', () => {
+  if (st.search) st.search = null;
+  clearTimeout(searchTimer); searchTimer = setTimeout(renderThreads, 120);
+});
+$('#q').addEventListener('keydown', async e => {
+  if (e.key === 'Escape') { $('#q').value = ''; st.search = null; renderThreads(); }
+  if (e.key !== 'Enter') return;
+  clearTimeout(searchTimer);
+  const q = $('#q').value.trim(); if (!q) return;
+  try {
+    const res = await api('/api/search?q=' + encodeURIComponent(q));
+    st.search = res;
+    $('#threadList').innerHTML = `<div class="sect">${faNum(res.length)} پیام شامل «${esc(q)}» — Esc برای بازگشت</div>` +
+      (res.map(m => `
+      <div class="item" data-t="${m.thread}">
+        <div class="av" style="background:${colorOf(m.address)}">${initial(m)}</div>
+        <div class="meta">
+          <div class="row1"><span class="nm">${esc(m.name || m.address)}</span><span class="tm">${when(m.date)}</span></div>
+          <div class="sn">${m.type !== 1 ? 'شما: ' : ''}${esc(m.body)}</div>
+        </div>
+      </div>`).join('') || '<div class="empty" style="padding:30px">چیزی پیدا نشد</div>');
+  } catch (err) { if (!(err instanceof AuthError)) toast('خطا در جستجو'); }
+});
+
+/* ---------- اعلان‌ها ---------- */
+const unreadOf = l => l.filter(x => !x.read && !x.out).length;
+function renderNotifBadge() {
+  const n = unreadOf(st.notifs);
+  $('#notifBadge').textContent = faNum(n);
+  $('#notifBadge').classList.toggle('hidden', !n);
+}
+const readSync = () => lsGet('pb_readsync') !== '0';
+const onlyUnread = () => lsGet('pb_onlyunread') === '1';
+async function markRead(body) {
+  // اول روی صفحه، بعد روی گوشی
+  const hit = n => body.all || (body.pkg && n.pkg === body.pkg) || (body.conv ? n.conv === body.conv : n.id === body.id);
+  st.notifs.forEach(n => { if (hit(n)) n.read = true; });
+  st.apps.forEach(a => { a.unread = unreadOf(st.notifs.filter(n => n.pkg === a.pkg)); });
+  renderNotifBadge(); renderApps(); renderNotifs();
+  try { await api('/api/notifs/read', {method: 'POST', body: JSON.stringify({id: body.id || 0, pkg: body.pkg || '', all: !!body.all, phone: readSync()})}); }
+  catch (e) { if (!(e instanceof AuthError)) toast(e.message); }
+}
+async function refreshNotifs() {
+  let r;
+  try { r = await api('/api/notifs'); } catch (e) { return; }
+  st.notifs = r.items; st.apps = r.apps; st.blocked = r.blocked || [];
+  renderBlocked();
+  const max = st.notifs.reduce((m, n) => Math.max(m, n.id), 0);
+  if (st.baseNotif !== null && max > st.baseNotif) {
+    const fresh = st.notifs.filter(n => n.id > st.baseNotif);
+    const f = fresh[0];
+    const code = f ? findCode(f.title + ' ' + f.text) : null;
+    alertNew(fresh.length, f ? (code ? `🔑 کد ${code} — ${f.app}` : `${f.app}: ${f.title}`) : 'اعلان جدید',
+      f ? (f.sender ? f.sender + ': ' : '') + f.text : '', () => { setTab('notif'); }, 'notif');
+  }
+  st.baseNotif = Math.max(st.baseNotif || 0, max);
+  renderNotifBadge();
+  renderApps(); renderNotifs();
+}
+function renderApps() {
+  const all = st.notifs.length;
+  $('#appList').innerHTML = `
+    <div class="item ${!st.notifApp ? 'sel' : ''}" data-p="">
+      <div class="av" style="background:var(--acc)">★</div>
+      <div class="meta"><div class="row1"><span class="nm">همه</span>${unreadOf(st.notifs) ? `<span class="badge" title="نخوانده">${faNum(unreadOf(st.notifs))}</span>` : ''}</div><div class="sn">${faNum(all)} اعلان</div></div>
+    </div>` + st.apps.map(a => `
+    <div class="item ${st.notifApp === a.pkg ? 'sel' : ''}" data-p="${esc(a.pkg)}">
+      <div class="av" style="background:${colorOf(a.pkg)}">${esc((a.app || '?')[0])}</div>
+      <div class="meta">
+        <div class="row1"><span class="nm">${esc(a.app)}</span><span class="tm">${when(a.last)}</span></div>
+        <div class="row1"><span class="sn">${faNum(a.count)} اعلان</span>${a.unread ? `<span class="badge" title="نخوانده">${faNum(a.unread)}</span>` : ''}</div>
+      </div>
+    </div>`).join('');
+}
+$('#appList').addEventListener('click', e => {
+  const it = e.target.closest('.item'); if (!it) return;
+  st.notifApp = it.dataset.p; renderApps(); renderNotifs();
+  document.body.classList.add('show-conv');
+});
+function renderNotifs() {
+  const scoped = st.notifApp ? st.notifs.filter(n => n.pkg === st.notifApp) : st.notifs;
+  const ur = unreadOf(scoped);
+  const list = onlyUnread() ? scoped.filter(n => !n.read && !n.out) : scoped;
+  const app = st.apps.find(a => a.pkg === st.notifApp);
+  $('#nHead').innerHTML = `<button class="back" id="nBack">→</button><div class="meta"><div class="nm">${st.notifApp ? esc(app ? app.app : st.notifApp) : 'همهٔ اعلان‌ها'}</div><div class="sub" style="direction:rtl">${faNum(scoped.length)} مورد${ur ? ` · <b style="color:var(--acc)">${faNum(ur)} نخوانده</b>` : ''} · جدیدترین بالا</div></div>
+    <div class="nopts">
+      <label title="فقط اعلان‌هایی که هنوز خوانده نشده‌اند"><input type="checkbox" id="optUnread" ${onlyUnread() ? 'checked' : ''}> فقط نخوانده‌ها</label>
+      <label title="وقتی اینجا «خوانده شد» می‌زنید، اعلان از روی گوشی هم برداشته می‌شود و اگر پیام‌رسان دکمهٔ «خوانده شد» داشته باشد (مثل واتس‌اپ و تلگرام) پیام آنجا هم خوانده‌شده علامت می‌خورد؛ یعنی طرف مقابل تیک خوانده‌شدن را می‌بیند"><input type="checkbox" id="optSync" ${readSync() ? 'checked' : ''}> روی گوشی هم</label>
+      ${ur ? `<button id="readAll">✓ همه خوانده شد</button>` : ''}
+    </div>`;
+  $('#nBack').onclick = () => document.body.classList.remove('show-conv');
+  $('#optUnread').onchange = e => { lsSet('pb_onlyunread', e.target.checked ? '1' : '0'); renderNotifs(); };
+  $('#optSync').onchange = e => { lsSet('pb_readsync', e.target.checked ? '1' : '0'); toast(e.target.checked ? 'خوانده‌شدن روی گوشی هم اعمال می‌شود' : 'فقط روی همین صفحه خوانده می‌شود'); renderNotifs(); };
+  const ra = $('#readAll'); if (ra) ra.onclick = () => markRead(st.notifApp ? {pkg: st.notifApp} : {all: true});
+  const seenConv = new Set();
+  $('#notifList').innerHTML = list.length ? list.map(n => {
+    // کادر پاسخ فقط زیر جدیدترین پیام هر گفتگو
+    const first = n.conv && !seenConv.has(n.conv); if (n.conv) seenConv.add(n.conv);
+    const messenger = MESSENGERS[n.pkg];
+    const tools = first && (n.canReply || messenger) ? `
+      ${n.canReply ? `<div class="rbox"><input placeholder="پاسخ به ${esc(n.title)}…" data-rid="${n.id}"><button class="pri" data-send="${n.id}">ارسال</button></div>` : ''}
+      ${messenger ? `<div class="nbtns"><button data-attach="${esc(n.pkg)}" title="فایل را به گوشی می‌فرستد و در ${esc(messenger)} آماده‌ی ارسال می‌کند">📎 فایل در ${esc(messenger)}</button></div>` : ''}` : '';
+    const unread = !n.read && !n.out;
+    return `<div class="n ${n.out ? 'out' : ''} ${unread ? 'unread' : ''}" data-id="${n.id}">
+      <div class="h"><span class="chip" style="background:${colorOf(n.pkg)}">${esc(n.app)}</span><span class="t">${esc(n.title)}</span><span class="tm">${fFull.format(new Date(n.time))}</span>
+        <span class="acts">${unread ? `<button class="rd" data-read="${n.id}" title="${n.canMark && readSync() ? 'در ' + esc(n.app) + ' هم خوانده‌شده علامت می‌خورد' : readSync() ? 'اعلانش از روی گوشی هم برداشته می‌شود' : 'فقط اینجا'}">✓ خوانده شد</button>` : ''}${n.out ? '' : `<button data-blockmenu="${n.id}" title="مسدود کردن (تبلیغات)">🚫</button>`}<button data-del="${n.id}" title="حذف این اعلان">🗑</button></span></div>
+      <div class="x">${n.sender ? `<span class="s">${esc(n.sender)}: </span>` : ''}${rich(n.text)}</div>${tools}
+    </div>`;
+  }).join('') : `<div class="empty">${onlyUnread() && scoped.length ? 'اعلان نخوانده‌ای نیست ✓' : st.perms.notif === false ? 'دسترسی به اعلان‌ها روی گوشی فعال نیست' : 'هنوز اعلانی دریافت نشده'}</div>`;
+}
+const MESSENGERS = {'ir.nasim': 'بله', 'com.whatsapp': 'واتس‌اپ', 'com.whatsapp.w4b': 'واتس‌اپ بیزینس',
+  'org.telegram.messenger': 'تلگرام', 'org.thunderdog.challegram': 'تلگرام', 'ir.eitaa.messenger': 'ایتا', 'ir.resaneh1.iptv': 'روبیکا'};
+async function sendReply(id) {
+  const inp = document.querySelector(`input[data-rid="${id}"]`); if (!inp || !inp.value.trim()) return;
+  const text = inp.value; inp.disabled = true;
+  try { await api('/api/notifs/reply', {method: 'POST', body: JSON.stringify({id: Number(id), text})}); inp.value = ''; toast('پاسخ فرستاده شد'); }
+  catch (e) { if (!(e instanceof AuthError)) toast(e.message); }
+  finally { inp.disabled = false; }
+}
+$('#notifList').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.del) {
+    const card = b.closest('.n'); card.style.opacity = '.3';
+    try { await api('/api/notifs/delete', {method: 'POST', body: JSON.stringify({id: Number(b.dataset.del)})}); card.remove(); st.notifs = st.notifs.filter(x => x.id !== Number(b.dataset.del)); }
+    catch (err) { card.style.opacity = ''; }
+    return;
+  }
+  if (b.dataset.blockmenu) {
+    const card = b.closest('.n'), old = card.querySelector('.bmenu');
+    if (old) { old.remove(); return; }
+    const n = st.notifs.find(x => x.id === Number(b.dataset.blockmenu)); if (!n) return;
+    const m = document.createElement('div'); m.className = 'bmenu';
+    m.innerHTML = `دیگر نشان داده نشود: <button data-block="conv" data-bid="${n.id}">فقط «${esc(n.title || 'این فرستنده')}»</button>
+      <button data-block="app" data-bid="${n.id}">کل برنامه‌ی ${esc(n.app)}</button><button data-cancel="1">انصراف</button>`;
+    card.appendChild(m); return;
+  }
+  if (b.dataset.cancel) { b.closest('.bmenu').remove(); return; }
+  if (b.dataset.read) {
+    const n = st.notifs.find(x => x.id === Number(b.dataset.read)); if (!n) return;
+    markRead(n.conv ? {id: n.id, conv: n.conv} : {id: n.id});
+    return;
+  }
+  if (b.dataset.block) {
+    const n = st.notifs.find(x => x.id === Number(b.dataset.bid));
+    if (b.dataset.block === 'app' && !confirm(`همه‌ی اعلان‌های «${n ? n.app : ''}» مسدود و حذف شود؟`)) return;
+    try {
+      await api('/api/notifs/block', {method: 'POST', body: JSON.stringify({id: Number(b.dataset.bid), scope: b.dataset.block})});
+      toast('مسدود شد؛ اعلان‌های قبلی هم حذف شدند'); if (b.dataset.block === 'app') st.notifApp = '';
+      await refreshNotifs();
+    } catch (err) {}
+    return;
+  }
+  if (b.dataset.send) sendReply(b.dataset.send);
+  if (b.dataset.attach) { st.attachPkg = b.dataset.attach; $('#attachIn').value = ''; $('#attachIn').click(); }
+});
+$('#notifList').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.dataset.rid) { e.preventDefault(); sendReply(e.target.dataset.rid); }
+});
+$('#attachIn').addEventListener('change', async () => {
+  const f = $('#attachIn').files[0]; if (!f) return;
+  const name = await uploadFile(f);
+  if (name) shareTo(name, st.attachPkg);
+});
+
+function renderBlocked() {
+  const b = st.blocked || [];
+  $('#blkSum').textContent = `🚫 مسدودشده‌ها (${faNum(b.length)})`;
+  $('#blkBox').classList.toggle('hidden', !b.length);
+  $('#blkList').innerHTML = b.map(r => `<div class="row"><span title="${esc(r.app)} ${esc(r.title)}">${r.type === 'app' ? '📱 کل ' + esc(r.app) : esc(r.app) + ': ' + esc(r.title)}</span>
+    <button data-unblock="${esc(r.key)}">آزاد</button></div>`).join('');
+}
+$('#blkList').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-unblock]'); if (!b) return;
+  try { await api('/api/notifs/unblock', {method: 'POST', body: JSON.stringify({key: b.dataset.unblock})}); toast('آزاد شد؛ اعلان‌های بعدی دوباره نشان داده می‌شوند'); refreshNotifs(); } catch (err) {}
+});
+
+$('#clearN').onclick = async () => {
+  const app = st.apps.find(a => a.pkg === st.notifApp);
+  if (!confirm(st.notifApp ? `اعلان‌های «${app ? app.app : st.notifApp}» پاک شود؟` : 'همهٔ اعلان‌ها پاک شود؟')) return;
+  try { await api('/api/notifs/clear', {method: 'POST', body: JSON.stringify({pkg: st.notifApp})}); st.notifApp = ''; await refreshNotifs(); } catch (e) {}
+};
+
+/* ---------- باتری، تماس جاری، کد ---------- */
+function renderBattery(b) {
+  if (!b || b.level < 0) { $('#bat').classList.add('hidden'); return; }
+  $('#bat').classList.remove('hidden');
+  $('#batTxt').textContent = faNum(b.level) + '٪';
+  $('#batFill').style.width = Math.max(4, b.level) + '%';
+  $('#batChg').textContent = b.charging ? '⚡' : '';
+  const low = b.level <= 20 && !b.charging;
+  $('#bat').classList.toggle('low', low);
+  $('#bat').title = 'باتری گوشی: ' + faNum(b.level) + '٪' + (b.charging ? ' (در حال شارژ)' : '');
+  if (b.level <= 15 && !b.charging && !st.lowBatWarned) {
+    st.lowBatWarned = true;
+    alertNew(1, '🪫 باتری گوشی کم است', faNum(b.level) + '٪ — گوشی را به شارژ بزنید', null, 'battery');
+  }
+  if (b.charging || b.level > 25) st.lowBatWarned = false;
+}
+
+function renderCall(c) {
+  const bar = $('#callBar');
+  if (!c || c.state === 'idle') { bar.classList.add('hidden'); st.ringKey = ''; return; }
+  const who = c.name ? `${esc(c.name)} <span style="direction:ltr;opacity:.85">${esc(c.number)}</span>` : (c.number ? `<span style="direction:ltr">${esc(c.number)}</span>` : '');
+  bar.classList.remove('hidden');
+  bar.classList.toggle('off', c.state !== 'ringing');
+  bar.innerHTML = c.state === 'ringing'
+    ? `<span class="ring">📞</span> تماس ورودی ${who ? 'از ' + who : ''}`
+    : `📞 در حال مکالمه ${who ? 'با ' + who : ''}`;
+  if (c.state === 'ringing') {
+    const key = c.since + ':' + c.number;
+    if (key !== st.ringKey && (c.number || st.ringKey === '')) {
+      const first = st.ringKey === '';
+      st.ringKey = key;
+      if (first || c.number) {
+        beep();
+        winNotify('📞 تماس ورودی', c.name ? `${c.name} (${c.number})` : (c.number || 'شماره نامشخص'), 'call');
+      }
+    }
+  }
+}
+
+let lastOtp = '';
+function renderOtp(o) {
+  const chip = $('#otpChip');
+  if (!o || !o.code) { chip.classList.add('hidden'); return; }
+  chip.classList.remove('hidden');
+  $('#otpCode').textContent = o.code;
+  $('#otpFrom').textContent = o.from ? '· ' + o.from : '';
+  chip.dataset.c = o.code;
+  lastOtp = o.code;
+}
+$('#otpChip').onclick = () => copy($('#otpChip').dataset.c);
+
+/* ---------- تماس‌ها ---------- */
+const CT = {1: ['in', '↙', 'ورودی'], 2: ['out', '↗', 'خروجی'], 3: ['miss', '↙', 'بی‌پاسخ'], 4: ['in', '✉', 'پیغام‌گیر'],
+            5: ['miss', '⊘', 'رد شده'], 6: ['miss', '⛔', 'مسدود'], 7: ['in', '↙', 'ورودی']};
+const maxMissId = () => st.calls.reduce((m, c) => c.type === 3 ? Math.max(m, c.id) : m, st.seenMiss);
+function fmtDur(s) { if (!s) return ''; const m = Math.floor(s / 60), x = s % 60; return faNum(m) + ':' + String(x).padStart(2, '0').replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+function renderCallsBadge() {
+  const n = st.calls.filter(c => c.type === 3 && c.id > st.seenMiss).length;
+  $('#callsBadge').textContent = faNum(n);
+  $('#callsBadge').classList.toggle('hidden', !n || st.tab === 'calls');
+}
+async function refreshCalls() {
+  let list;
+  try { list = await api('/api/calls'); } catch (e) { return; }
+  st.calls = list;
+  const maxMiss = list.reduce((m, c) => c.type === 3 ? Math.max(m, c.id) : m, 0);
+  if (st.baseMiss !== null && maxMiss > st.baseMiss) {
+    const c = list.find(x => x.id === maxMiss);
+    alertNew(1, '📵 تماس بی‌پاسخ از ' + (c ? (c.name || c.number) : ''), c && c.name ? c.number : '', () => setTab('calls'), 'missed');
+  }
+  if (st.baseMiss === null) st.seenMiss = maxMiss;
+  st.baseMiss = Math.max(st.baseMiss || 0, maxMiss);
+  if (st.tab === 'calls') st.seenMiss = maxMiss;
+  renderCallsBadge();
+  $('#callsSub').textContent = faNum(list.length) + ' تماس';
+  $('#callList').innerHTML = list.length ? list.map(c => {
+    const [cls, ic, label] = CT[c.type] || ['in', '•', 'تماس'];
+    return `<div class="call ${cls}">
+      <div class="ic ${cls}">${ic}</div>
+      <div class="meta">
+        <div class="row1"><span class="nm">${esc(c.name || c.number || 'ناشناس')}</span></div>
+        <div class="sn">${label} · ${fFull.format(new Date(c.date))}${c.duration ? ' · ' + fmtDur(c.duration) : ''}${c.name ? ` · <span style="direction:ltr;unicode-bidi:isolate">${esc(c.number)}</span>` : ''}</div>
+      </div>
+      ${c.number ? `${waLink(c.number) ? `<a href="${waLink(c.number)}" target="_blank" rel="noopener"><button>واتس‌اپ وب</button></a>` : ''}<button data-copy="${esc(c.number)}">کپی شماره</button><button data-sms="${esc(c.number)}">پیامک</button>` : ''}
+    </div>`;
+  }).join('') : `<div class="empty">${st.perms.calls === false ? 'مجوز «تماس‌ها» روی گوشی داده نشده' : 'تماسی نیست'}</div>`;
+}
+$('#callList').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.copy) copy(b.dataset.copy);
+  if (b.dataset.sms) {
+    const num = b.dataset.sms;
+    const ex = st.threads.find(t => normNum(t.address) === normNum(num));
+    const c = st.calls.find(x => x.number === num);
+    setTab('sms'); openThread(ex || {thread: null, address: num, name: c ? c.name : null});
+  }
+});
+
+/* ---------- فایل‌ها ---------- */
+const fmtSize = b => b >= 1048576 ? faNum((b / 1048576).toFixed(1)) + ' MB' : faNum(Math.max(1, Math.round(b / 1024))) + ' KB';
+st.outCount = 0; st.seenFiles = null; st.mediaLoaded = false;
+function uploadFile(file) {
+  return new Promise(resolve => {
+    const box = document.createElement('div');
+    box.innerHTML = `<div class="fm" style="margin-top:8px">${esc(file.name)} — ${fmtSize(file.size)}</div><div class="prog"><i></i></div>`;
+    $('#upProg').appendChild(box);
+    const bar = box.querySelector('i');
+    const x = new XMLHttpRequest();
+    x.open('POST', '/api/upload?name=' + encodeURIComponent(file.name));
+    x.setRequestHeader('X-PayamBin', '1');
+    x.upload.onprogress = e => { if (e.lengthComputable) bar.style.width = (e.loaded / e.total * 100) + '%'; };
+    x.onload = () => {
+      box.remove();
+      let j = null; try { j = JSON.parse(x.responseText); } catch (e) {}
+      if (x.status === 200 && j) { toast('به گوشی رسید: ' + j.name); refreshFiles(); resolve(j.name); }
+      else { if (x.status === 401) showLogin(); else toast('ارسال فایل نشد'); resolve(null); }
+    };
+    x.onerror = () => { box.remove(); toast('ارسال فایل نشد (اتصال)'); resolve(null); };
+    x.send(file);
+  });
+}
+async function shareTo(name, pkg) {
+  try {
+    await api('/api/files/share', {method: 'POST', body: JSON.stringify({name, pkg})});
+    toast(`روی گوشی اعلان «📎 فرستادن در ${MESSENGERS[pkg] || '…'}» را لمس کنید و گفتگو را انتخاب کنید`);
+  } catch (e) { if (!(e instanceof AuthError)) toast(e.message); }
+}
+async function uploadMany(files) { for (const f of files) await uploadFile(f); }
+$('#drop').onclick = () => $('#fileIn').click();
+$('#fileIn').onchange = () => { uploadMany([...$('#fileIn').files]); $('#fileIn').value = ''; };
+['dragenter', 'dragover'].forEach(ev => $('#drop').addEventListener(ev, e => { e.preventDefault(); $('#drop').classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => $('#drop').addEventListener(ev, e => { e.preventDefault(); $('#drop').classList.remove('over'); }));
+$('#drop').addEventListener('drop', e => uploadMany([...e.dataTransfer.files]));
+
+const fileUrl = (box, name, dl = 1) => `/api/files/get?box=${box}&name=${encodeURIComponent(name)}&dl=${dl}`;
+function renderFilesBadge() {
+  const n = st.seenFiles === null ? 0 : Math.max(0, st.outCount - st.seenFiles);
+  $('#filesBadge').textContent = faNum(n); $('#filesBadge').classList.toggle('hidden', !n || st.tab === 'files');
+}
+async function refreshFiles() {
+  let r; try { r = await api('/api/files'); } catch (e) { return; }
+  if (st.seenFiles !== null && r.out.length > st.outCount) {
+    const f = r.out[0];
+    alertNew(1, '📥 فایل از گوشی: ' + f.name, fmtSize(f.size), () => setTab('files'), 'files');
+  }
+  st.outCount = r.out.length;
+  if (st.seenFiles === null || st.tab === 'files') st.seenFiles = st.outCount;
+  renderFilesBadge();
+  st.files = r;
+  renderFileLists();
+}
+const FILE_PAGE = 15;
+st.fileShow = {in: FILE_PAGE, out: FILE_PAGE};
+function renderFileLists() {
+  const r = st.files; if (!r) return;
+  const pick = box => {
+    const q = toLatin($('#' + box + 'Q').value.trim()).toLowerCase();
+    const all = q ? r[box].filter(f => toLatin(f.name).toLowerCase().includes(q)) : r[box];
+    const total = r[box].reduce((a, f) => a + f.size, 0);
+    $('#' + box + 'Bar').classList.toggle('hidden', !r[box].length);
+    $('#' + box + 'Sum').textContent = faNum(r[box].length) + ' فایل · ' + fmtSize(total);
+    const more = all.length > st.fileShow[box] ? `<button class="fmore" data-more="${box}">نمایش ${faNum(all.length - st.fileShow[box])} فایل دیگر</button>` : '';
+    return {list: all.slice(0, st.fileShow[box]), more, empty: q && !all.length ? '<div class="fm">چیزی پیدا نشد</div>' : ''};
+  };
+  const share = n => `<button data-share="ir.nasim" data-n="${esc(n)}">بله</button><button data-share="com.whatsapp" data-n="${esc(n)}">واتس‌اپ</button><button data-share="org.telegram.messenger" data-n="${esc(n)}">تلگرام</button><button data-share="" data-n="${esc(n)}">سایر…</button>`;
+  const I = pick('in'), O = pick('out');
+  $('#inList').innerHTML = I.list.map(f => `<div class="frow"><span class="fn" title="${esc(f.name)}">${esc(f.name)}</span><span class="fm">${fmtSize(f.size)} · ${when(f.time)}</span>
+      <span class="fm">فرستادن در:</span>${share(f.name)}<a href="${fileUrl('in', f.name)}"><button>دانلود</button></a><button data-del="in" data-n="${esc(f.name)}">حذف</button></div>`).join('') + I.more
+    || I.empty;
+  $('#outList').innerHTML = O.list.map(f => `<div class="frow"><span class="fn" title="${esc(f.name)}">${esc(f.name)}</span><span class="fm">${fmtSize(f.size)} · ${when(f.time)}</span>
+      ${/^(image|video|application\/pdf|text)/.test(f.mime) ? `<a href="${fileUrl('out', f.name, 0)}" target="_blank"><button>نمایش</button></a>` : ''}<a href="${fileUrl('out', f.name)}"><button class="pri">دانلود</button></a><button data-del="out" data-n="${esc(f.name)}">حذف</button></div>`).join('') + O.more
+    || O.empty || '<div class="fm">چیزی فرستاده نشده</div>';
+}
+$('#filesView').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.share !== undefined) shareTo(b.dataset.n, b.dataset.share);
+  if (b.dataset.more) { st.fileShow[b.dataset.more] += 50; renderFileLists(); return; }
+  if (b.dataset.clear) {
+    const box = b.dataset.clear, age = Number($('#' + box + 'Age').value);
+    const n = st.files[box].filter(f => !age || Date.now() - f.time > age).length;
+    if (!n) { toast('فایلی با این شرط نیست'); return; }
+    const where = box === 'in' ? '\n\nنسخه‌ای که در پوشه‌ی Download/PayamBin گوشی ذخیره شده باقی می‌ماند.' : '';
+    if (!confirm(`${faNum(n)} فایل از فهرست «${box === 'in' ? 'فرستاده‌شده به گوشی' : 'فرستاده‌شده از گوشی'}» پاک شود؟${where}`)) return;
+    try {
+      const res = await api('/api/files/clear', {method: 'POST', body: JSON.stringify({box, olderThanMs: age})});
+      toast(`${faNum(res.count)} فایل پاک شد (${fmtSize(res.bytes)} آزاد شد)`);
+      st.fileShow[box] = FILE_PAGE; refreshFiles();
+    } catch (err) {}
+    return;
+  }
+  if (b.dataset.del) {
+    if (!confirm('«' + b.dataset.n + '» حذف شود؟')) return;
+    try { await api('/api/files/delete', {method: 'POST', body: JSON.stringify({box: b.dataset.del, name: b.dataset.n})}); refreshFiles(); } catch (err) {}
+  }
+});
+['in', 'out'].forEach(box => $('#' + box + 'Q').addEventListener('input', () => { st.fileShow[box] = FILE_PAGE; renderFileLists(); }));
+async function loadMedia() {
+  st.mediaLoaded = true;
+  $('#media').innerHTML = '<div class="fm">در حال بارگذاری…</div>';
+  let list;
+  try { list = await api('/api/media?limit=60'); }
+  catch (e) { $('#media').innerHTML = `<div class="fm">${e.message.includes('permission') ? 'مجوز «عکس‌ها و ویدیوها» روی گوشی داده نشده (برنامه ← مجوزها)' : 'خطا: ' + esc(e.message)}</div>`; return; }
+  $('#media').innerHTML = list.length ? '<div class="grid">' + list.map(m => `
+    <div class="tile" title="${esc(m.name)} · ${fmtSize(m.size)}" data-open="/api/media/file?kind=${m.kind}&id=${m.id}&dl=0">
+      <img loading="lazy" src="/api/media/thumb?kind=${m.kind}&id=${m.id}" alt="">
+      ${m.kind === 'video' ? '<span class="vd">▶ ویدیو</span>' : ''}
+      <a class="dl" href="/api/media/file?kind=${m.kind}&id=${m.id}" title="دانلود" onclick="event.stopPropagation()">⬇</a>
+    </div>`).join('') + '</div>' : '<div class="fm">عکسی پیدا نشد</div>';
+}
+$('#media').addEventListener('click', e => { const t = e.target.closest('.tile'); if (t) window.open(t.dataset.open, '_blank'); });
+$('#mediaRefresh').onclick = loadMedia;
+
+/* ---------- کلیپ‌بورد ---------- */
+st.clips = []; st.baseClip = null;
+async function refreshClip() {
+  let list; try { list = await api('/api/clip'); } catch (e) { return; }
+  st.clips = list;
+  const maxPhone = list.reduce((m, c) => c.from === 'phone' ? Math.max(m, c.id) : m, 0);
+  if (st.baseClip !== null && maxPhone > st.baseClip) {
+    const c = list.find(x => x.id === maxPhone);
+    alertNew(1, '📋 متن از گوشی', c.text, () => openClip(), 'clip');
+    $('#clipBadge').textContent = '۱'; $('#clipBadge').classList.remove('hidden');
+  }
+  st.baseClip = Math.max(st.baseClip || 0, maxPhone);
+  renderClips();
+}
+function renderClips() {
+  $('#clipList').innerHTML = st.clips.length ? st.clips.map(c => `<div class="citem"><pre><small>${c.from === 'phone' ? '📱 از گوشی' : '💻 از کامپیوتر'} · ${when(c.time)}</small>${esc(c.text)}</pre><button data-clip="${c.id}">کپی</button></div>`).join('')
+    : '<p class="mute">خالی است. در گوشی: «اشتراک‌گذاری ← ارسال به کامپیوتر» یا دکمه‌ی «ارسال کلیپ‌بورد» در برنامه.</p>';
+}
+function openClip() { $('#clipBadge').classList.add('hidden'); renderClips(); $('#clipModal').classList.remove('hidden'); setTimeout(() => $('#clipText').focus(), 50); }
+$('#clipBtn').onclick = openClip;
+$('#closeClip').onclick = () => $('#clipModal').classList.add('hidden');
+$('#clipModal').addEventListener('click', e => {
+  if (e.target.id === 'clipModal') $('#clipModal').classList.add('hidden');
+  const b = e.target.closest('button[data-clip]'); if (b) { const c = st.clips.find(x => String(x.id) === b.dataset.clip); if (c) copy(c.text); }
+});
+$('#clipSend').onclick = async () => {
+  const t = $('#clipText').value; if (!t) return;
+  try { await api('/api/clip', {method: 'POST', body: JSON.stringify({text: t})}); $('#clipText').value = ''; toast('در کلیپ‌بورد گوشی قرار گرفت'); refreshClip(); } catch (e) {}
+};
+
+/* ---------- پیدا کردن گوشی ---------- */
+$('#ringBtn').onclick = async () => {
+  const on = $('#ringBtn').classList.contains('on');
+  try {
+    await api(on ? '/api/ring/stop' : '/api/ring', {method: 'POST', body: '{}'});
+    $('#ringBtn').classList.toggle('on', !on); $('#ringBtn').textContent = on ? '📳' : '🔕 قطع زنگ';
+    if (!on) toast('گوشی تا ۶۰ ثانیه زنگ می‌زند');
+  } catch (e) {}
+};
+
+/* ---------- دوربین ---------- */
+st.cam = {state: 'off'}; st.camViewing = false; st.camRot = Number(lsGet('pb_camrot') || 0);
+let camPollT = null;
+function camStatusText(c) {
+  switch (c.state) {
+    case 'waiting_tap': return '📱 روی گوشی اعلان «📷 کامپیوتر می‌خواهد دوربین را ببیند» را لمس کنید<small style="display:block;opacity:.75;margin-top:6px">(اندروید اجازه نمی‌دهد دوربین بدون اجازه‌ی شما از پس‌زمینه روشن شود؛ بعد از آن تا وقتی قطع نکنید پخش ادامه دارد)</small>';
+    case 'starting': return 'در حال روشن کردن دوربین…';
+    case 'error': return '⚠️ ' + esc(c.error || 'خطا');
+    case 'on': return '';
+    case 'ready': return '✅ دوربین آماده است<br><small style="display:block;opacity:.75;margin-top:6px">بدون نیاز به تأیید روی گوشی روشن می‌شود</small>';
+    default: return 'دوربین خاموش است' + (c.standby === false ? '' : '<small style="display:block;opacity:.75;margin-top:6px">بار اول باید روی گوشی تأیید کنید، یا یک بار برنامه‌ی پیام‌بین را روی گوشی باز کنید</small>');
+  }
+}
+function renderCam(c) {
+  if (!c) return;
+  const prev = st.cam.state; st.cam = c;
+  const on = c.state === 'on';
+  $('#camMsg').innerHTML = camStatusText(c);
+  $('#camMsg').classList.toggle('hidden', on && st.camViewing && $('#camImg').naturalWidth > 0);
+  $('#camLive').classList.toggle('hidden', !on);
+  $('#camInfo').classList.toggle('hidden', !on);
+  $('#camInfo').textContent = on ? `${c.width}×${c.height} · ${c.actualFps || 0} fps · ${c.facing === 'front' ? 'front' : 'back'}` : '';
+  if (c.fps) $('#camFps').value = String(c.fps);
+  const idle = c.state === 'off' || c.state === 'error' || c.state === 'ready';
+  $('#camStart').textContent = idle ? '▶ روشن کردن دوربین' : '⏹ خاموش کردن دوربین';
+  $('#camStart').classList.toggle('pri', idle);
+  $('#camFacing').textContent = c.facing === 'front' ? '🔄 دوربین عقب' : '🔄 دوربین جلو';
+  $('#camTorch').classList.toggle('hidden', !(on && c.hasFlash));
+  $('#camTorch').classList.toggle('on', !!c.torch);
+  $('#camQuality').value = c.quality || 'mid';
+  if (on && st.tab === 'cam' && (!st.camViewing || prev !== 'on')) camView();
+  if (!on && st.camViewing && (c.state === 'off' || c.state === 'error' || c.state === 'ready')) camUnview();
+  if (rec.on && (c.state === 'off' || c.state === 'ready')) { recStop(); toast('دوربین خاموش شد؛ ضبط پایان یافت'); }
+
+  layoutCam();
+  // در حالت انتظار سریع‌تر وضعیت را بپرس
+  clearTimeout(camPollT);
+  if (st.tab === 'cam' && (c.state === 'starting' || c.state === 'waiting_tap')) camPollT = setTimeout(camPoll, 1000);
+}
+async function camPoll() { try { renderCam(await api('/api/cam')); } catch (e) {} }
+async function camCmd(body) { try { renderCam(await api('/api/cam', {method: 'POST', body: JSON.stringify(body)})); } catch (e) {} }
+function camView() {
+  st.camViewing = true;
+  $('#camImg').src = '/api/cam/stream?t=' + Date.now();
+}
+function camUnview() { st.camViewing = false; $('#camImg').removeAttribute('src'); }
+function camEnter() { camPoll(); }
+function camLeave() { clearTimeout(camPollT); if (st.camViewing) camUnview(); }
+$('#camImg').onload = () => { $('#camMsg').classList.add('hidden'); layoutCam(); };
+$('#camImg').onerror = () => { if (st.camViewing && st.cam.state === 'on' && st.tab === 'cam') setTimeout(() => { if (st.camViewing) camView(); }, 1500); };
+function camRotation() { return ((st.cam.orientation || 0) + st.camRot) % 360; }
+function layoutCam() {
+  const img = $('#camImg'), stage = $('#camStage');
+  const rot = camRotation(), sw = stage.clientWidth, sh = stage.clientHeight, side = rot % 180 === 90;
+  img.style.maxWidth = (side ? sh : sw) + 'px';
+  img.style.maxHeight = (side ? sw : sh) + 'px';
+  img.style.transform = `rotate(${rot}deg)` + (st.cam.facing === 'front' ? (side ? ' scaleY(-1)' : ' scaleX(-1)') : '');
+}
+window.addEventListener('resize', layoutCam);
+document.addEventListener('fullscreenchange', () => setTimeout(layoutCam, 50));
+$('#camStart').onclick = () => {
+  const off = st.cam.state === 'off' || st.cam.state === 'error' || st.cam.state === 'ready';
+  camCmd(off ? {action: 'start', facing: st.cam.facing || 'back', quality: $('#camQuality').value, fps: Number($('#camFps').value)} : {action: 'stop'});
+};
+$('#camFacing').onclick = () => camCmd({action: st.cam.state === 'on' ? 'reconfig' : 'none', facing: st.cam.facing === 'front' ? 'back' : 'front'});
+$('#camQuality').onchange = () => camCmd({action: st.cam.state === 'on' ? 'reconfig' : 'none', quality: $('#camQuality').value});
+$('#camFps').onchange = () => camCmd({action: st.cam.state === 'on' ? 'reconfig' : 'none', fps: Number($('#camFps').value)});
+$('#camTorch').onclick = () => camCmd({action: 'torch', on: !st.cam.torch});
+$('#camRotate').onclick = () => { st.camRot = (st.camRot + 90) % 360; lsSet('pb_camrot', st.camRot); layoutCam(); };
+$('#camSnap').onclick = () => { if (st.cam.state === 'on') location.href = '/api/cam/snap'; else toast('دوربین روشن نیست'); };
+$('#camFull').onclick = () => { const s = $('#camStage'); if (document.fullscreenElement) document.exitFullscreen(); else if (s.requestFullscreen) s.requestFullscreen(); };
+
+/* ---------- صدای زنده‌ی گوشی ---------- */
+const au = {ctx: null, mix: null, listen: null, dest: null, analyser: null, ctl: null, running: false, next: 0,
+  wantListen: false, wantRec: false, wantMicRec: false, rate: 24000, lastData: 0, msg: ''};
+function auInit() {
+  if (au.ctx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  // هم‌نرخ با گوشی (۲۴ کیلوهرتز) تا هر تکه جدا تبدیل نشود و مرز تکه‌ها تق‌تق نکند
+  try { au.ctx = new AC({sampleRate: 24000, latencyHint: 'playback'}); } catch (e) { au.ctx = new AC(); }
+  au.mix = au.ctx.createGain();
+  // مسیر شنیدن: حذف بم خیلی پایین (وزوز) و زیر خیلی بالا (خش) + کنترل بلندی
+  au.hp = au.ctx.createBiquadFilter(); au.hp.type = 'highpass'; au.hp.frequency.value = 90;
+  au.lp = au.ctx.createBiquadFilter(); au.lp.type = 'lowpass'; au.lp.frequency.value = 7500;
+  au.comp = au.ctx.createDynamicsCompressor(); au.comp.threshold.value = -20; au.comp.ratio.value = 6;
+  au.listen = au.ctx.createGain(); au.listen.gain.value = 0;
+  au.dest = au.ctx.createMediaStreamDestination();
+  au.mix.connect(au.hp); au.hp.connect(au.lp); au.lp.connect(au.comp); au.comp.connect(au.listen); au.listen.connect(au.ctx.destination);
+  au.mix.connect(au.dest);
+  au.analyser = au.ctx.createAnalyser(); au.analyser.fftSize = 1024;
+  au.mix.connect(au.analyser);
+}
+function auUpdate() {
+  const need = au.wantListen || au.wantRec || au.wantMicRec;
+  if (need) { auInit(); au.ctx.resume(); au.listen.gain.value = au.wantListen ? Number($('#micVol').value) / 100 : 0; if (!au.running) auLoop(); }
+  else if (au.running) { au.running = false; if (au.ctl) au.ctl.abort(); }
+  $('#camAudio').classList.toggle('on', au.wantListen);
+  $('#camAudio').textContent = au.wantListen ? '🔊 صدا' : '🔇 صدا';
+  $('#micListen').classList.toggle('on', au.wantListen);
+  $('#micListen').textContent = au.wantListen ? '🔇 قطع صدا' : '🔊 گوش دادن زنده';
+  if (!need) { au.msg = ''; }
+  micStatus();
+}
+function micStatus() {
+  const need = au.wantListen || au.wantRec || au.wantMicRec;
+  let t;
+  if (!need) t = 'خاموش';
+  else if (au.msg) t = au.msg;
+  else if (Date.now() - au.lastData < 2000) t = '<span class="okline">● در حال دریافت صدا</span>' + (au.wantListen ? ' — پخش روی بلندگو' : ' — بدون پخش');
+  else t = 'در حال اتصال به میکروفون…';
+  $('#micStat').innerHTML = t;
+}
+async function auLoop() {
+  au.running = true;
+  while (au.running) {
+    try {
+      au.ctl = new AbortController();
+      const r = await fetch('/api/cam/audio?t=' + Date.now(), {signal: au.ctl.signal, cache: 'no-store'});
+      if (!r.ok) {
+        let j = {}; try { j = await r.json(); } catch (e) {}
+        if (j.waiting) { au.msg = '📱 ' + esc(j.error); micStatus(); await new Promise(res => setTimeout(res, 2000)); continue; }
+        toast(j.error || 'صدا در دسترس نیست');
+        au.msg = '⚠️ ' + esc(j.error || 'صدا در دسترس نیست');
+        if (mrec.on) micRecStop();
+        au.wantListen = false; au.wantRec = false; au.wantMicRec = false; au.running = false; auUpdate(); return;
+      }
+      au.msg = '';
+      au.rate = Number(r.headers.get('X-Sample-Rate')) || 24000;
+      const rd = r.body.getReader(); let carry = null;
+      au.next = 0;
+      while (au.running) {
+        const {value, done} = await rd.read(); if (done) break;
+        au.lastData = Date.now();
+        let bytes = value;
+        if (carry) { const b = new Uint8Array(carry.length + bytes.length); b.set(carry); b.set(bytes, carry.length); bytes = b; carry = null; }
+        if (bytes.length % 2) { carry = bytes.slice(bytes.length - 1); bytes = bytes.subarray(0, bytes.length - 1); }
+        if (!bytes.length) continue;
+        const pcm = new Int16Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.length));
+        const buf = au.ctx.createBuffer(1, pcm.length, au.rate), ch = buf.getChannelData(0);
+        for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
+        const src = au.ctx.createBufferSource(); src.buffer = buf; src.connect(au.mix);
+        const now = au.ctx.currentTime;
+        if (au.next < now + 0.02 || au.next > now + 1.2) {
+          // عقب/جلو افتادیم → دوباره هم‌گام با بافر ۳۵۰ میلی‌ثانیه و کمی محو کردن تا «تق» نزند
+          au.next = now + 0.35;
+          for (let i = 0; i < Math.min(240, ch.length); i++) ch[i] *= i / 240;
+        }
+        src.start(au.next); au.next += buf.duration;
+      }
+    } catch (e) {}
+    if (au.running) await new Promise(res => setTimeout(res, 2000));
+  }
+}
+$('#camAudio').onclick = () => { au.wantListen = !au.wantListen; auUpdate(); };
+$('#micListen').onclick = () => { au.wantListen = !au.wantListen; auUpdate(); };
+$('#micVol').value = lsGet('pb_micvol') || 80;
+$('#micVol').oninput = () => { lsSet('pb_micvol', $('#micVol').value); if (au.listen && au.wantListen) au.listen.gain.value = Number($('#micVol').value) / 100; };
+$('#micNs').onchange = async () => {
+  try { await api('/api/cam', {method: 'POST', body: JSON.stringify({action: 'none', noiseSuppress: $('#micNs').checked})}); toast($('#micNs').checked ? 'کاهش نویز روشن شد' : 'کاهش نویز خاموش شد'); } catch (e) {}
+};
+
+/* ضبط فقط صدا */
+const mrec = {on: false, mr: null, start: 0, segStart: 0, saved: 0, mime: '', timer: null};
+function micMime() {
+  if (!window.MediaRecorder) return null;
+  for (const m of ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/webm']) if (MediaRecorder.isTypeSupported(m)) return m;
+  return null;
+}
+function micNewSeg() {
+  const chunks = [], segStart = Date.now();
+  const mr = new MediaRecorder(au.dest.stream, {mimeType: mrec.mime, audioBitsPerSecond: 64000});
+  mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  mr.onstop = () => {
+    if (!chunks.length) return;
+    const ext = mrec.mime.includes('mp4') ? 'm4a' : mrec.mime.includes('ogg') ? 'ogg' : 'webm';
+    const d = new Date(segStart);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(chunks, {type: mrec.mime.split(';')[0]}));
+    a.download = `PayamBin-mic-${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}_${pad2(d.getHours())}-${pad2(d.getMinutes())}-${pad2(d.getSeconds())}.${ext}`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    mrec.saved++; $('#micSaved').textContent = faNum(mrec.saved) + ' فایل در Downloads ذخیره شد';
+  };
+  mr.start(1000);
+  mrec.mr = mr; mrec.segStart = segStart;
+}
+function micTick() {
+  const s = Math.floor((Date.now() - mrec.start) / 1000);
+  $('#micTime').textContent = `REC ${pad2(Math.floor(s / 3600))}:${pad2(Math.floor(s / 60) % 60)}:${pad2(s % 60)}`;
+  const seg = Number($('#micSeg').value);
+  if (seg && Date.now() - mrec.segStart >= seg * 60000) { mrec.mr.stop(); micNewSeg(); }
+  micStatus();
+}
+function micRecStart() {
+  mrec.mime = micMime();
+  if (!mrec.mime) { toast('این مرورگر ضبط صدا را پشتیبانی نمی‌کند'); return; }
+  au.wantMicRec = true; auUpdate();
+  mrec.on = true; mrec.start = Date.now(); mrec.saved = 0; $('#micSaved').textContent = '';
+  micNewSeg();
+  mrec.timer = setInterval(micTick, 1000); micTick();
+  $('#micRec').classList.add('on'); $('#micRec').textContent = '⏹ پایان ضبط';
+  $('#micTime').classList.remove('hidden'); $('#micDot').classList.remove('hidden');
+}
+function micRecStop() {
+  mrec.on = false; clearInterval(mrec.timer);
+  if (mrec.mr && mrec.mr.state !== 'inactive') mrec.mr.stop();
+  mrec.mr = null;
+  au.wantMicRec = false; auUpdate();
+  $('#micRec').classList.remove('on'); $('#micRec').textContent = '⏺ ضبط صدا';
+  $('#micTime').classList.add('hidden'); $('#micDot').classList.add('hidden');
+}
+$('#micRec').onclick = () => mrec.on ? micRecStop() : micRecStart();
+window.addEventListener('beforeunload', e => { if (mrec.on) { mrec.mr && mrec.mr.stop(); e.preventDefault(); e.returnValue = ''; } });
+
+/* نشانگر بلندی صدا */
+function micMeterLoop() {
+  if (st.tab !== 'mic') return;
+  let lvl = 0;
+  if (au.analyser && (au.wantListen || au.wantRec || au.wantMicRec)) {
+    const a = new Float32Array(au.analyser.fftSize); au.analyser.getFloatTimeDomainData(a);
+    let sum = 0; for (const v of a) sum += v * v;
+    lvl = Math.min(1, Math.sqrt(sum / a.length) * 4);
+  }
+  $('#micMeter').style.width = (lvl * 100) + '%';
+  requestAnimationFrame(micMeterLoop);
+}
+setInterval(() => { if (st.tab === 'mic') micStatus(); }, 1000);
+
+/* ---------- ضبط دوربین روی کامپیوتر ---------- */
+const fStamp = new Intl.DateTimeFormat(L, {year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'});
+const rec = {on: false, mr: null, chunks: [], canvas: null, ctx: null, segStart: 0, start: 0, ctl: null, saved: 0, mime: '', timer: null};
+function recMime(withAudio) {
+  if (!window.MediaRecorder) return null;
+  const list = withAudio
+    ? ['video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4;codecs=avc1,opus', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+    : ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  for (const m of list)
+    if (MediaRecorder.isTypeSupported(m)) return m;
+  return null;
+}
+const pad2 = n => String(n).padStart(2, '0');
+function recFileName(t) {
+  const d = new Date(t);
+  return `PayamBin-${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}_${pad2(d.getHours())}-${pad2(d.getMinutes())}-${pad2(d.getSeconds())}.${rec.mime.includes('mp4') ? 'mp4' : 'webm'}`;
+}
+function recNewSegment() {
+  const stream = rec.canvas.captureStream();
+  if (rec.audio && au.dest) au.dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+  const q = st.cam.quality || 'mid';
+  rec.mr = new MediaRecorder(stream, {mimeType: rec.mime, audioBitsPerSecond: 64000, videoBitsPerSecond: q === 'low' ? 1200000 : q === 'high' ? 5000000 : 2500000});
+  rec.chunks = [];
+  const myChunks = rec.chunks, segStart = Date.now();
+  rec.mr.ondataavailable = e => { if (e.data && e.data.size) myChunks.push(e.data); };
+  rec.mr.onstop = () => {
+    if (!myChunks.length) return;
+    const blob = new Blob(myChunks, {type: rec.mime.split(';')[0]});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = recFileName(segStart);
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    rec.saved++;
+    $('#recSaved').textContent = faNum(rec.saved) + ' فایل در پوشه‌ی Downloads ذخیره شد';
+  };
+  rec.mr.start(1000);
+  rec.segStart = segStart;
+}
+function recCutSegment() { if (rec.mr && rec.mr.state !== 'inactive') rec.mr.stop(); rec.mr = null; }
+function recDraw(bmp) {
+  const rot = camRotation(), side = rot % 180 === 90;
+  const W = side ? bmp.height : bmp.width, H = side ? bmp.width : bmp.height;
+  if (!rec.canvas) { rec.canvas = document.createElement('canvas'); rec.ctx = rec.canvas.getContext('2d'); }
+  if (rec.canvas.width !== W || rec.canvas.height !== H) {
+    // تغییر اندازه (مثلاً تعویض دوربین) → تکه‌ی جدید
+    recCutSegment(); rec.canvas.width = W; rec.canvas.height = H;
+  }
+  const c = rec.ctx;
+  c.save(); c.translate(W / 2, H / 2); c.rotate(rot * Math.PI / 180);
+  if (st.cam.facing === 'front') c.scale(side ? 1 : -1, side ? -1 : 1);
+  c.drawImage(bmp, -bmp.width / 2, -bmp.height / 2); c.restore();
+  if ($('#recStamp').checked) {
+    const pp = {}; fStamp.formatToParts(new Date()).forEach(x => pp[x.type] = x.value);
+    const txt = `${pp.year}/${pp.month}/${pp.day}   ${pp.hour}:${pp.minute}:${pp.second}`;
+    const fs = Math.max(14, Math.round(W / 32));
+    c.font = `bold ${fs}px Tahoma, sans-serif`; c.textBaseline = 'bottom'; c.direction = 'ltr';
+    const tw = c.measureText(txt).width;
+    c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(W - tw - fs, H - fs * 1.8, tw + fs * .8, fs * 1.5);
+    c.fillStyle = '#fff'; c.textAlign = 'right'; c.fillText(txt, W - fs * .6, H - fs * .45);
+  }
+  if (!rec.mr) recNewSegment();
+  const segMin = Number($('#recSeg').value);
+  if (segMin && Date.now() - rec.segStart >= segMin * 60000) { recCutSegment(); recNewSegment(); }
+}
+function findSeq(buf, seq, from) {
+  outer: for (let i = from; i <= buf.length - seq.length; i++) { for (let j = 0; j < seq.length; j++) if (buf[i + j] !== seq[j]) continue outer; return i; }
+  return -1;
+}
+const CRLF2 = [13, 10, 13, 10];
+async function recLoop() {
+  while (rec.on) {
+    try {
+      rec.ctl = new AbortController();
+      const r = await fetch('/api/cam/stream?rec=' + Date.now(), {signal: rec.ctl.signal, cache: 'no-store'});
+      if (!r.ok || !r.body) throw new Error('no stream');
+      const rd = r.body.getReader();
+      let buf = new Uint8Array(0);
+      while (rec.on) {
+        const {value, done} = await rd.read();
+        if (done) break;
+        const nb = new Uint8Array(buf.length + value.length); nb.set(buf); nb.set(value, buf.length); buf = nb;
+        // استخراج فریم‌های JPEG از multipart
+        while (true) {
+          const h = findSeq(buf, CRLF2, 0); if (h < 0) break;
+          const head = new TextDecoder('latin1').decode(buf.subarray(0, h));
+          const m = /Content-Length:\s*(\d+)/i.exec(head);
+          if (!m) { buf = buf.subarray(h + 4); continue; }
+          const len = Number(m[1]), startB = h + 4;
+          if (buf.length < startB + len) break;
+          const jpg = buf.slice(startB, startB + len);
+          buf = buf.subarray(startB + len);
+          try { const bmp = await createImageBitmap(new Blob([jpg], {type: 'image/jpeg'})); recDraw(bmp); bmp.close(); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    recCutSegment(); // قطع شد → تکه‌ی فعلی ذخیره شود
+    if (rec.on) await new Promise(res => setTimeout(res, 3000));
+  }
+}
+function recTick() {
+  const s = Math.floor((Date.now() - rec.start) / 1000);
+  $('#recTime').textContent = `REC ${pad2(Math.floor(s / 3600))}:${pad2(Math.floor(s / 60) % 60)}:${pad2(s % 60)}`;
+}
+function recStart() {
+  rec.audio = $('#recAudio').checked;
+  rec.mime = recMime(rec.audio);
+  if (!rec.mime) { toast('این مرورگر ضبط ویدیو را پشتیبانی نمی‌کند'); return; }
+  if (st.cam.state !== 'on') { toast('اول دوربین را روشن کنید'); return; }
+  rec.on = true; rec.start = Date.now(); rec.saved = 0; $('#recSaved').textContent = '';
+  if (rec.audio) { au.wantRec = true; auUpdate(); }
+  $('#camRec').classList.add('on'); $('#camRec').textContent = '⏹ پایان ضبط';
+  $('#recBadge').classList.remove('hidden'); $('#recDot').classList.remove('hidden');
+  rec.timer = setInterval(recTick, 1000); recTick();
+  recLoop();
+  toast('ضبط شروع شد — فایل‌ها در پوشه‌ی Downloads ذخیره می‌شوند');
+}
+function recStop() {
+  rec.on = false;
+  if (rec.ctl) rec.ctl.abort();
+  if (au.wantRec) { au.wantRec = false; auUpdate(); }
+  recCutSegment();
+  clearInterval(rec.timer);
+  $('#camRec').classList.remove('on'); $('#camRec').textContent = '⏺ ضبط';
+  $('#recBadge').classList.add('hidden'); $('#recDot').classList.add('hidden');
+}
+$('#camRec').onclick = () => rec.on ? recStop() : recStart();
+window.addEventListener('beforeunload', e => { if (rec.on) { recCutSegment(); e.preventDefault(); e.returnValue = ''; } });
+
+/* ---------- صفحه‌ی گوشی + کنترل ---------- */
+st.scr = {state: 'off'}; st.scrViewing = false;
+let scrPollT = null, scrCtlWarned = false;
+function scrMsgText(c) {
+  switch (c.state) {
+    case 'waiting_tap': return '📱 روی گوشی اعلان «🖥 کامپیوتر می‌خواهد صفحه‌ی گوشی را ببیند» را لمس کنید<small style="display:block;opacity:.75;margin-top:6px">و در پنجره‌ی اندروید «شروع» (Start now) را بزنید — اندروید برای ضبط صفحه هر بار اجازه می‌خواهد</small>';
+    case 'error': return '⚠️ ' + esc(c.error || 'خطا');
+    case 'on': return st.scrViewing ? '' : 'در حال اتصال…';
+    default: return 'صفحه‌ی گوشی به اشتراک گذاشته نشده<small style="display:block;opacity:.75;margin-top:6px">«▶ شروع» را بزنید</small>';
+  }
+}
+function renderScr(c) {
+  if (!c) return;
+  const prev = st.scr.state; st.scr = c;
+  const on = c.state === 'on';
+  $('#scrMsg').innerHTML = scrMsgText(c);
+  $('#scrMsg').classList.toggle('hidden', on && st.scrViewing && $('#scrImg').naturalWidth > 0);
+  $('#scrStart').textContent = on ? '⏹ قطع اشتراک صفحه' : '▶ شروع';
+  $('#scrStart').classList.toggle('pri', !on);
+  if (document.activeElement !== $('#scrQuality')) $('#scrQuality').value = c.quality || 'mid';
+  if (document.activeElement !== $('#scrFps')) $('#scrFps').value = String(c.fps || 15);
+  if (c.dim !== undefined) $('#scrDim').checked = !!c.dim;
+  if (c.dim && c.canDim === false && on && !st.dimWarned) { st.dimWarned = true; toast('برای کم شدن نور گوشی: در برنامه ☰ ← مجوزها ← «کم کردن نور گوشی» اجازه دهید'); }
+  if (on && st.tab === 'screen' && (!st.scrViewing || prev !== 'on')) scrView();
+  if (!on && st.scrViewing) scrUnview();
+  if (on && c.controlEnabled === false && !scrCtlWarned) { scrCtlWarned = true; toast('برای کنترل با ماوس: در گوشی ☰ ← مجوزها ← «کنترل گوشی با ماوس و کیبورد» را فعال کنید'); }
+  clearTimeout(scrPollT);
+  if (st.tab === 'screen' && c.state === 'waiting_tap') scrPollT = setTimeout(scrPoll, 1000);
+}
+async function scrPoll() { try { renderScr(await api('/api/screen')); } catch (e) {} }
+async function scrCmd(b) { try { renderScr(await api('/api/screen', {method: 'POST', body: JSON.stringify(b)})); } catch (e) {} }
+function scrView() { st.scrViewing = true; $('#scrImg').src = '/api/screen/stream?t=' + Date.now(); }
+function scrUnview() { st.scrViewing = false; $('#scrImg').removeAttribute('src'); }
+function scrEnter() { scrPoll(); }
+function scrLeave() { clearTimeout(scrPollT); if (st.scrViewing) scrUnview(); }
+$('#scrImg').onload = () => $('#scrMsg').classList.add('hidden');
+$('#scrImg').onerror = () => { if (st.scrViewing && st.scr.state === 'on' && st.tab === 'screen') setTimeout(() => { if (st.scrViewing) scrView(); }, 1500); };
+$('#scrStart').onclick = () => scrCmd({action: st.scr.state === 'on' ? 'stop' : 'start', quality: $('#scrQuality').value, fps: Number($('#scrFps').value)});
+$('#scrQuality').onchange = () => scrCmd({action: 'none', quality: $('#scrQuality').value});
+$('#scrFps').onchange = () => scrCmd({action: 'none', fps: Number($('#scrFps').value)});
+$('#scrDim').onchange = () => scrCmd({action: 'none', dim: $('#scrDim').checked});
+$('#scrWake').onclick = () => scrCmd({action: 'wake'});
+$('#scrFull').onclick = () => { const s = $('#scrStage'); if (document.fullscreenElement) document.exitFullscreen(); else s.requestFullscreen && s.requestFullscreen(); };
+
+let inputBusy = Promise.resolve();
+function sendInput(o) {
+  // ترتیب رویدادها حفظ شود
+  inputBusy = inputBusy.then(() => api('/api/screen/input', {method: 'POST', body: JSON.stringify(o)})
+    .catch(e => { if (!(e instanceof AuthError)) toast(e.message); }));
+  return inputBusy;
+}
+document.querySelectorAll('#screenView [data-g]').forEach(b => b.onclick = () => sendInput({type: 'global', name: b.dataset.g}));
+
+function scrPos(e) {
+  const r = $('#scrImg').getBoundingClientRect();
+  return {x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)), px: e.clientX - r.left, py: e.clientY - r.top};
+}
+function tapFx(e) {
+  const st0 = $('#scrStage').getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'tapfx'; d.style.left = (e.clientX - st0.left) + 'px'; d.style.top = (e.clientY - st0.top) + 'px';
+  $('#scrStage').appendChild(d); setTimeout(() => d.remove(), 500);
+}
+let down = null;
+$('#scrImg').addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;
+  e.preventDefault(); $('#scrStage').focus();
+  $('#scrImg').setPointerCapture(e.pointerId);
+  down = {p: scrPos(e), t: Date.now()};
+});
+$('#scrImg').addEventListener('pointerup', e => {
+  if (!down || e.button !== 0) return;
+  const p = scrPos(e), dt = Date.now() - down.t, dist = Math.hypot(p.px - down.p.px, p.py - down.p.py);
+  if (dist < 8) { sendInput({type: dt > 450 ? 'long' : 'tap', x: p.x, y: p.y}); tapFx(e); }
+  else sendInput({type: 'swipe', x1: down.p.x, y1: down.p.y, x2: p.x, y2: p.y, ms: Math.max(120, Math.min(1500, dt))});
+  down = null;
+});
+$('#scrImg').addEventListener('contextmenu', e => { e.preventDefault(); sendInput({type: 'global', name: 'back'}); });
+let wheelAcc = 0, wheelT = null, wheelPos = null;
+$('#scrImg').addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = $('#scrImg').getBoundingClientRect();
+  wheelAcc += e.deltaY / r.height * 1.6; wheelPos = scrPos(e);
+  if (!wheelT) wheelT = setTimeout(() => { sendInput({type: 'scroll', x: wheelPos.x, y: wheelPos.y, dy: wheelAcc}); wheelAcc = 0; wheelT = null; }, 140);
+}, {passive: false});
+
+// کیبورد
+let typeBuf = '', typeT = null;
+function flushType() { if (typeBuf) { const t = typeBuf; typeBuf = ''; sendInput({type: 'text', text: t}); } typeT = null; }
+$('#scrStage').addEventListener('keydown', e => {
+  if (e.isComposing) return;
+  const k = e.key;
+  if ((e.ctrlKey || e.metaKey) && k.toLowerCase() === 'v') return; // رویداد paste
+  if ((e.ctrlKey || e.metaKey) && k.toLowerCase() === 'a') { e.preventDefault(); flushType(); sendInput({type: 'key', key: 'SelectAll'}); return; }
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  if (['Backspace', 'Delete', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(k)) { e.preventDefault(); flushType(); sendInput({type: 'key', key: k}); return; }
+  if (k === 'Escape') { e.preventDefault(); flushType(); sendInput({type: 'global', name: 'back'}); return; }
+  if (k === 'Home') { e.preventDefault(); sendInput({type: 'global', name: 'home'}); return; }
+  if (k.length === 1) { e.preventDefault(); typeBuf += k; clearTimeout(typeT); typeT = setTimeout(flushType, 90); }
+});
+$('#scrStage').addEventListener('paste', e => {
+  const t = e.clipboardData && e.clipboardData.getData('text');
+  if (t) { e.preventDefault(); flushType(); sendInput({type: 'text', text: t}); toast('متن چسبانده شد'); }
+});
+
+/* ---------- واتس‌اپ وب برای یک شماره ---------- */
+function waLink(num) {
+  let n = toLatin(num || '').replace(/[^\d+]/g, '');
+  if (n.startsWith('+')) n = n.slice(1);
+  else if (n.startsWith('00')) n = n.slice(2);
+  else if (n.startsWith('0')) n = '98' + n.slice(1);
+  else if (n.length === 10 && n.startsWith('9')) n = '98' + n;
+  return n.length >= 11 ? 'https://web.whatsapp.com/send?phone=' + n : null;
+}
+
+/* ---------- تنظیمات ---------- */
+function openSettings() { renderSettings(); $('#modal').classList.remove('hidden'); }
+$('#setBtn').onclick = openSettings;
+$('#closeModal').onclick = () => $('#modal').classList.add('hidden');
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') $('#modal').classList.add('hidden'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#modal').classList.add('hidden'); $('#clipModal').classList.add('hidden'); } });
+
+function hostUrl() { return `http://payambin.local:${st.port}`; }
+async function renderSettings() {
+  const ns = notifState(), origins = [hostUrl()];
+  if (!origins.includes(location.origin)) origins.push(location.origin);
+  let h = '';
+  if (ns === 'granted') {
+    h = `<p class="okline">✓ فعال است${notifOn() ? '' : ' (ولی با دکمهٔ 🔕 خاموش شده)'}</p>
+      <p class="mute">وقتی این صفحه پشت پنجره‌های دیگر یا کوچک‌شده باشد، پیامک، اعلان پیام‌رسان، تماس و باتری کم با اعلان ویندوز خبر داده می‌شود. اگر اعلانی نیامد، در ویندوز: Settings ← System ← Notifications ← مرورگر را روشن و «Do not disturb / Focus» را خاموش کنید.</p>
+      <button id="testNotif">ارسال اعلان آزمایشی</button>`;
+  } else if (ns === 'default') {
+    h = `<p>یک بار اجازه بدهید:</p><button class="pri" id="askNotif">فعال‌سازی اعلان ویندوز</button>`;
+  } else if (ns === 'denied') {
+    h = `<p class="badline">مرورگر اجازهٔ اعلان را رد کرده است.</p><p>روی آیکن کنار نوار آدرس (ⓘ یا قفل) کلیک کنید ← Notifications را روی <b>Allow</b> بگذارید و صفحه را تازه کنید.</p>`;
+  } else if (ns === 'insecure') {
+    h = `<p>مرورگرها اعلان را فقط برای سایت‌های «امن» اجازه می‌دهند. یک بار این تنظیم را انجام دهید (فقط روی همین کامپیوتر):</p>
+      <ol>
+        <li>در نوار آدرس بزنید: <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code> (در Edge: <code>edge://flags/#unsafely-treat-insecure-origin-as-secure</code>)</li>
+        <li>در کادر متن این را بنویسید: <code>${origins.join(',')}</code> <button id="copyOrig">کپی</button></li>
+        <li>گزینه را روی <b>Enabled</b> بگذارید و دکمهٔ <b>Relaunch</b> را بزنید.</li>
+        <li>دوباره همین پنجره را باز کنید و «فعال‌سازی اعلان ویندوز» را بزنید.</li>
+      </ol>`;
+  } else {
+    h = '<p class="badline">این مرورگر اعلان را پشتیبانی نمی‌کند؛ از Chrome یا Edge استفاده کنید.</p>';
+  }
+  $('#notifHelp').innerHTML = h;
+  const tn = $('#testNotif'); if (tn) tn.onclick = () => { if (!winNotify('پیام‌بین', 'این یک اعلان آزمایشی است ✓')) toast('اعلان ارسال نشد'); };
+  const an = $('#askNotif'); if (an) an.onclick = async () => { await Notification.requestPermission(); lsSet('pb_notif', '1'); renderBell(); renderSettings(); };
+  const co = $('#copyOrig'); if (co) co.onclick = () => copy(origins.join(','));
+
+  const a = st.addr || {};
+  const ips = (a.ips || []).map(ip => `<code>http://${ip}:${st.port}</code>`).join(' ');
+  $('#addrHelp').innerHTML = `<p>آدرس ثابت: <a href="${hostUrl()}" style="direction:ltr">${hostUrl()}</a> ${a.mdns === 'فعال' ? '<span class="okline">✓</span>' : `<span class="badline">(${esc(a.mdns || 'نامشخص')})</span>`}</p>
+    <p class="mute">با عوض شدن IP گوشی هم کار می‌کند. اگر باز نشد: ویندوز ۱۰/۱۱ لازم است، شبکهٔ وای‌فای/LAN در ویندوز باید <b>Private</b> باشد، و در این حالت از آدرس IP استفاده کنید: ${ips || '—'}</p>`;
+
+  renderProxy();
+
+  let key = '…';
+  try { key = (await api('/api/apikey')).key; } catch (e) {}
+  $('#apiKey').textContent = key;
+  const base = hostUrl();
+  const ex = (title, code) => `<p class="mute" style="margin:12px 0 4px">${title}</p><pre>${esc(code)}</pre>`;
+  $('#apiExamples').innerHTML =
+    ex('PowerShell — آخرین کد ۳ دقیقهٔ اخیر:', `(Invoke-RestMethod "${base}/api/otp?key=${key}").code`) +
+    ex('PowerShell — منتظر کد جدید بمان (اول زمان را بگیر، بعد درخواست کد را بزن):',
+`$t = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
+# ... اینجا دکمهٔ «ارسال کد» سایت را بزنید ...
+$code = (Invoke-RestMethod "${base}/api/otp?key=${key}&since=$t&wait=60").code`) +
+    ex('Python:',
+`import requests, time
+t = int(time.time() * 1000)
+r = requests.get("${base}/api/otp",
+                 params={"key": "${key}", "since": t, "wait": 60}, timeout=70).json()
+print(r["code"])`) +
+    ex('خروجی نمونه:', `{"code":"583921","source":"sms","from":"Bank Mellat","text":"رمز پویا: 583921 ...","time":1763000000000}`);
+}
+function usageHtml(info) {
+  const mbs = b => faNum((b / 1048576).toFixed(1)) + ' MB';
+  const t = info.today || {up: 0, down: 0, devices: []};
+  const total = t.up + t.down, cap = info.capMb * 1048576;
+  const pct = cap ? Math.min(100, total / cap * 100) : 0;
+  return `<p style="margin:8px 0 4px">مصرف امروز: <b>${mbs(total)}</b>${cap ? ' از ' + faNum(info.capMb) + ' MB' : ''} · اتصال فعال: ${faNum(info.active)}</p>
+    ${cap ? `<div class="prog"><i style="width:${pct}%;background:${pct > 90 ? 'var(--bad)' : 'var(--acc)'}"></i></div>` : ''}
+    ${t.devices.length ? `<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px">
+      <tr style="color:var(--mute)"><td>دستگاه</td><td>ارسال</td><td>دریافت</td><td>جمع</td></tr>
+      ${t.devices.map(d => `<tr style="border-top:1px solid var(--line)"><td><code>${esc(d.ip.replace(/^::ffff:/, ''))}</code>${d.ip === info.you ? ' (این کامپیوتر)' : ''}</td><td>${mbs(d.up)}</td><td>${mbs(d.down)}</td><td><b>${mbs(d.up + d.down)}</b></td></tr>`).join('')}
+    </table>` : ''}`;
+}
+
+async function renderProxy(info) {
+  if (!info) { try { info = await api('/api/proxy'); } catch (e) { return; } }
+  const mbs = b => faNum((b / 1048576).toFixed(1)) + ' MB';
+  const pac = `http://${info.ip}:${st.port}/proxy.pac`;
+  $('#proxyHelp').innerHTML = `
+    <p class="mute">این کامپیوتر از اینترنت گوشی (داده همراه، یا فیلترشکن اگر روشن باشد) استفاده می‌کند. شبکه‌ی داخلی اداره مثل قبل مستقیم می‌ماند.</p>
+    <div class="keyrow"><b style="flex:1">${info.on ? '<span class="okline">● روشن</span> — مسیر: ' + esc(info.route) : (info.wanted ? '<span class="badline">● ' + esc(info.status) + '</span>' : '● خاموش')}</b>
+      <button class="${info.on ? '' : 'pri'}" id="pxToggle">${info.on ? 'خاموش کردن' : 'روشن کردن'}</button></div>
+    ${info.blocked ? `<p class="badline">⛔ ${esc(info.blocked)}</p>` : ''}
+    ${info.on ? usageHtml(info) : ''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0">
+      <label>سقف مصرف روزانه: <input type="number" id="pxCap" min="0" value="${info.capMb || ''}" placeholder="نامحدود" style="width:90px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--soft)"> MB</label>
+      <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="pxSched" ${info.sched.on ? 'checked' : ''}> فقط ساعت کاری</label>
+      <label>از <input type="time" id="pxStart" value="${esc(info.sched.start.padStart(5, '0'))}" style="padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--soft)"></label>
+      <label>تا <input type="time" id="pxEnd" value="${esc(info.sched.end.padStart(5, '0'))}" style="padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--soft)"></label>
+      <button id="pxSave">ذخیره</button>
+    </div>
+    <p><b>تنظیم ویندوز (یک بار):</b> Settings ← Network &amp; Internet ← Proxy ← «Use setup script» را روشن کنید و این آدرس را بدهید:</p>
+    <div class="keyrow"><code>${esc(pac)}</code><button id="copyPac">کپی</button></div>
+    <p class="mute">ویندوز ۷: Internet Options ← Connections ← LAN settings ← «Use automatic configuration script» با همین آدرس.
+    یا دستی: پروکسی <code>${esc(info.ip)}</code> پورت <code>${info.port}</code> و تیک «Bypass proxy server for local addresses».</p>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="pxRestrict" ${info.restrict ? 'checked' : ''}> فقط دستگاه‌هایی که با رمز وارد پیام‌بین شده‌اند</label>
+    ${info.restrict ? `<p class="mute">دستگاه‌های مجاز: ${(info.clients || []).map(c => `<code>${esc(c)}</code>`).join(' ') || '—'} <button id="pxClear" style="padding:2px 8px;font-size:12px">پاک کردن</button></p>`
+      : '<p class="mute">الان هر دستگاه شبکه‌ی داخلی که این پروکسی را تنظیم کند، بدون رمز از اینترنت گوشی استفاده می‌کند.</p>'}`;
+  $('#pxSave').onclick = async () => {
+    const body = {capMb: Number(toLatin($('#pxCap').value || '0')) || 0, sched: $('#pxSched').checked, start: $('#pxStart').value, end: $('#pxEnd').value};
+    try { renderProxy(await api('/api/proxy', {method: 'POST', body: JSON.stringify(body)})); toast('ذخیره شد'); } catch (e) {}
+  };
+  $('#pxToggle').onclick = async () => { try { renderProxy(await api('/api/proxy', {method: 'POST', body: JSON.stringify({on: !info.on})})); } catch (e) {} };
+  $('#copyPac').onclick = () => copy(pac);
+  $('#pxRestrict').onchange = async e => { try { renderProxy(await api('/api/proxy', {method: 'POST', body: JSON.stringify({restrict: e.target.checked})})); } catch (err) {} };
+  if ($('#pxClear')) $('#pxClear').onclick = async () => { try { renderProxy(await api('/api/proxy', {method: 'POST', body: JSON.stringify({clearClients: true})})); toast('فقط همین کامپیوتر مجاز ماند'); } catch (e) {} };
+}
+
+$('#copyKey').onclick = () => copy($('#apiKey').textContent);
+$('#newKey').onclick = async () => {
+  if (!confirm('کلید فعلی باطل شود و کلید جدید ساخته شود؟ (اسکریپت‌ها را باید به‌روز کنید)')) return;
+  try { await api('/api/apikey/new', {method: 'POST', body: '{}'}); renderSettings(); toast('کلید جدید ساخته شد'); } catch (e) {}
+};
+
+/* شروع */
+renderBell();
+(async () => {
+  try { await api('/api/state'); start(); } catch (e) { if (!(e instanceof AuthError)) showLogin(); }
+})();
+
+/* ---------- منوی راست‌کلیک مخصوص پیام‌بین ---------- */
+(function () {
+  let menu = null, hl = null;
+  const close = () => { const m = menu, h = hl; menu = null; hl = null; if (m) m.remove(); if (h) h.classList.remove('ctx-hl'); };
+  const toPhone = async t => { try { await api('/api/clip', {method: 'POST', body: JSON.stringify({text: t})}); toast('در کلیپ‌بورد گوشی قرار گرفت'); } catch (e) {} };
+  const smsTo = (num, text) => {
+    const ex = st.threads.find(t => normNum(t.address) === normNum(num));
+    setTab('sms'); openThread(ex || {thread: null, address: toLatin(num).trim(), name: null});
+    if (text) { bodyEl.value = text; bodyEl.dispatchEvent(new Event('input')); bodyEl.focus(); }
+  };
+  const searchSms = q => { setTab('sms'); $('#q').value = q; $('#q').dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true})); };
+  const looksNum = t => { const d = toLatin(t).replace(/[\s\-()]/g, ''); return /^\+?\d{7,15}$/.test(d); };
+  const short = t => { t = (t || '').replace(/\s+/g, ' ').trim(); return t.length > 40 ? t.slice(0, 40) + '…' : t; };
+  const textItems = (text, label) => {
+    const code = findCode(text), it = [];
+    if (code) it.push({i: '🔑', t: 'کپی کد ' + code, f: () => copy(code)});
+    it.push({i: '📋', t: label || 'کپی متن', f: () => copy(text)});
+    it.push({i: '📲', t: 'بفرست به کلیپ‌بورد گوشی', f: () => toPhone(text)});
+    return it;
+  };
+  const go = (tab, i, t) => ({i, t, f: () => setTab(tab)});
+
+  function build(e) {
+    const tg = e.target, sel = (window.getSelection() || '').toString().trim();
+    let head = '', items = [];
+
+    // متن انتخاب‌شده
+    if (sel) {
+      head = '«' + short(sel) + '»';
+      items.push(...textItems(sel, 'کپی'));
+      if (looksNum(sel)) {
+        items.push({i: '✉️', t: 'پیامک به این شماره', f: () => smsTo(sel)});
+        const w = waLink(sel); if (w) items.push({i: '🟢', t: 'گفتگو در واتس‌اپ وب', f: () => window.open(w, '_blank')});
+      }
+      items.push({i: '🔍', t: 'جستجو در همهٔ پیامک‌ها', f: () => searchSms(sel)});
+      return {head, items};
+    }
+
+    // حباب پیامک
+    const b = tg.closest('#msgs .b');
+    if (b && st.curMsgs) {
+      const m = st.curMsgs[Number(b.dataset.i)]; hl = b;
+      if (m) {
+        head = (m.type === 1 ? 'پیامک از ' + (st.cur.name || st.cur.address) : 'پیامک شما') + ' · ' + fFull.format(new Date(m.date));
+        items.push(...textItems(m.body));
+        items.push('-');
+        items.push({i: '↩️', t: 'نقل در پاسخ', f: () => { bodyEl.value = '«' + short(m.body) + '»\n' + bodyEl.value; bodyEl.dispatchEvent(new Event('input')); bodyEl.focus(); }});
+        items.push({i: '➡️', t: 'فرستادن برای شمارهٔ دیگر…', f: () => { const n = prompt('شمارهٔ گیرنده:'); if (n && normNum(n)) smsTo(n, m.body); }});
+        if (m.type === 5) items.push({i: '🔁', t: 'ارسال دوباره', f: () => { bodyEl.value = m.body; bodyEl.dispatchEvent(new Event('input')); $('#compose').requestSubmit(); }});
+      }
+      return {head, items};
+    }
+
+    // گفتگوی پیامک
+    const th = tg.closest('#threadList .item');
+    if (th && th.dataset.t) {
+      const t = st.threads.find(x => String(x.thread) === th.dataset.t); hl = th;
+      if (t) {
+        head = (t.name ? t.name + ' · ' : '') + t.address;
+        items.push({i: '💬', t: 'باز کردن', f: () => openThread(t)});
+        if (t.unread) items.push({i: '✓', t: 'خوانده شد', f: () => smsMarkRead(t)});
+        items.push('-');
+        items.push({i: '📋', t: 'کپی شماره', f: () => copy(t.address)});
+        if (t.name) items.push({i: '👤', t: 'کپی نام و شماره', f: () => copy(t.name + ' ' + t.address)});
+        const w = waLink(t.address); if (w) items.push({i: '🟢', t: 'گفتگو در واتس‌اپ وب', f: () => window.open(w, '_blank')});
+        items.push({i: '📲', t: 'آخرین پیام به کلیپ‌بورد گوشی', f: () => toPhone(t.snippet)});
+      }
+      return {head, items};
+    }
+
+    // کارت اعلان
+    const nc = tg.closest('#notifList .n');
+    if (nc) {
+      const n = st.notifs.find(x => x.id === Number(nc.dataset.id)); hl = nc;
+      if (n) {
+        head = n.app + ' · ' + (n.title || '');
+        if (!n.read && !n.out) items.push({i: '✓', t: 'خوانده شد', f: () => markRead(n.conv ? {id: n.id, conv: n.conv} : {id: n.id})});
+        const ri = nc.querySelector('input[data-rid]');
+        if (ri) items.push({i: '↩️', t: 'پاسخ', f: () => ri.focus()});
+        items.push(...textItems(n.text));
+        items.push('-');
+        if (st.notifApp !== n.pkg) items.push({i: '🗂', t: 'فقط اعلان‌های ' + n.app, f: () => { st.notifApp = n.pkg; renderApps(); renderNotifs(); }});
+        items.push({i: '🗑', t: 'حذف این اعلان', f: () => nc.querySelector('[data-del]').click()});
+        if (!n.out) {
+          items.push({i: '🚫', t: 'مسدود: «' + short(n.title || 'این فرستنده') + '»', d: 1, f: async () => { await api('/api/notifs/block', {method: 'POST', body: JSON.stringify({id: n.id, scope: 'conv'})}); toast('مسدود شد'); refreshNotifs(); }});
+          items.push({i: '⛔', t: 'مسدود: کل ' + n.app, d: 1, f: async () => { if (!confirm(`همه‌ی اعلان‌های «${n.app}» مسدود و حذف شود؟`)) return; await api('/api/notifs/block', {method: 'POST', body: JSON.stringify({id: n.id, scope: 'app'})}); st.notifApp = ''; toast('مسدود شد'); refreshNotifs(); }});
+        }
+      }
+      return {head, items};
+    }
+
+    // برنامه در فهرست اعلان‌ها
+    const ap = tg.closest('#appList .item');
+    if (ap) {
+      const pkg = ap.dataset.p, a = st.apps.find(x => x.pkg === pkg); hl = ap;
+      head = pkg ? (a ? a.app : pkg) : 'همهٔ اعلان‌ها';
+      items.push({i: '🗂', t: 'نمایش', f: () => ap.click()});
+      if (pkg ? a && a.unread : unreadOf(st.notifs)) items.push({i: '✓', t: 'همه خوانده شد', f: () => markRead(pkg ? {pkg} : {all: true})});
+      items.push('-');
+      items.push({i: '🧹', t: 'پاک کردن اعلان‌ها', d: 1, f: async () => { if (!confirm(`اعلان‌های «${head}» پاک شود؟`)) return; await api('/api/notifs/clear', {method: 'POST', body: JSON.stringify({pkg})}); st.notifApp = ''; refreshNotifs(); }});
+      return {head, items};
+    }
+
+    // تماس
+    const cl = tg.closest('#callList .call');
+    if (cl) {
+      hl = cl;
+      const bt = cl.querySelector('[data-sms]'), num = bt ? bt.dataset.sms : '';
+      head = cl.querySelector('.nm').textContent;
+      if (num) {
+        items.push({i: '✉️', t: 'پیامک', f: () => smsTo(num)});
+        items.push({i: '📋', t: 'کپی شماره', f: () => copy(num)});
+        const w = waLink(num); if (w) items.push({i: '🟢', t: 'گفتگو در واتس‌اپ وب', f: () => window.open(w, '_blank')});
+        items.push({i: '🔍', t: 'پیامک‌های این شماره', f: () => searchSms(num)});
+      }
+      return {head, items};
+    }
+
+    // فایل‌ها
+    const fr = tg.closest('#filesView .frow');
+    if (fr) {
+      hl = fr; head = fr.querySelector('.fn').textContent;
+      fr.querySelectorAll('button').forEach(btn => {
+        const lbl = btn.textContent.trim();
+        const share = btn.dataset.share !== undefined;
+        items.push({i: share ? '📤' : lbl === 'حذف' ? '🗑' : lbl === 'نمایش' ? '👁' : '⬇️', t: share ? 'فرستادن در ' + lbl : lbl, d: lbl === 'حذف', f: () => btn.click()});
+      });
+      items.push({i: '📋', t: 'کپی نام فایل', f: () => copy(head)});
+      return {head, items};
+    }
+    const tile = tg.closest('#media .tile');
+    if (tile) {
+      hl = tile; head = tile.title;
+      items.push({i: '👁', t: 'نمایش', f: () => window.open(tile.dataset.open, '_blank')});
+      items.push({i: '⬇️', t: 'دانلود', f: () => tile.querySelector('a.dl').click()});
+      return {head, items};
+    }
+
+    // جای خالی صفحه
+    head = 'پیام‌بین';
+    items.push({i: '🔄', t: 'تازه‌سازی', k: 'F5', f: () => location.reload()});
+    if (unreadOf(st.notifs) || st.threads.some(t => t.unread)) items.push({i: '✓', t: 'همه چیز خوانده شد', f: () => { if (unreadOf(st.notifs)) markRead({all: true}); if (st.threads.some(t => t.unread)) $('#smsReadAll').click(); }});
+    if (lastOtp) items.push({i: '🔑', t: 'کپی آخرین کد (' + lastOtp + ')', f: () => copy(lastOtp)});
+    items.push({i: '📋', t: 'کلیپ‌بورد مشترک', f: () => $('#clipBtn').click()});
+    items.push({i: '📳', t: $('#ringBtn').classList.contains('on') ? 'قطع زنگ گوشی' : 'پیدا کردن گوشی (زنگ)', f: () => $('#ringBtn').click()});
+    items.push({i: '✏️', t: 'پیامک جدید…', f: () => { setTab('sms'); $('#newBtn').click(); }});
+    items.push('-');
+    items.push(go('sms', '💬', 'پیامک‌ها'), go('notif', '🔔', 'اعلان‌ها'), go('calls', '📞', 'تماس‌ها'), go('files', '📁', 'فایل‌ها'));
+    items.push('-');
+    items.push({i: '⚙️', t: 'تنظیمات', f: () => openSettings()});
+    return {head, items};
+  }
+
+  document.addEventListener('contextmenu', e => {
+    close();
+    if (e.shiftKey) return;                                     // Shift + راست‌کلیک = منوی خود مرورگر
+    if ($('#app').classList.contains('hidden')) return;          // صفحهٔ ورود
+    const tg = e.target;
+    if (tg.closest('input, textarea, select, [contenteditable], video, canvas, #screenView, #camView, .modal')) return;
+    if (tg.closest('a[href]') && !(window.getSelection() || '').toString().trim()) return;
+    const r = build(e);
+    if (!r.items.length) return;
+    e.preventDefault();
+    if (hl) hl.classList.add('ctx-hl');
+    menu = document.createElement('div'); menu.className = 'ctx';
+    const acts = [];
+    menu.innerHTML = (r.head ? `<div class="hd">${esc(r.head)}</div>` : '') + r.items.map(x => {
+      if (x === '-') return '<hr>';
+      acts.push(x);
+      return `<button data-a="${acts.length - 1}" class="${x.d ? 'danger' : ''}"><span class="i">${x.i || ''}</span><span>${esc(x.t)}</span>${x.k ? `<span class="k">${x.k}</span>` : ''}</button>`;
+    }).join('').replace(/^(<hr>)+|(<hr>)+$/g, '') + '<div class="ft">Shift + راست‌کلیک: منوی مرورگر</div>';
+    menu.onclick = ev => { const bt = ev.target.closest('button[data-a]'); if (!bt) return; const a = acts[Number(bt.dataset.a)]; close(); Promise.resolve().then(a.f).catch(err => { if (!(err instanceof AuthError)) toast(err.message); }); };
+    document.body.appendChild(menu);
+    const w = menu.offsetWidth, h = menu.offsetHeight;
+    menu.style.left = Math.max(6, Math.min(e.clientX - (e.clientX - w > 6 ? w : 0), innerWidth - w - 6)) + 'px';
+    menu.style.top = Math.max(6, Math.min(e.clientY, innerHeight - h - 6)) + 'px';
+  });
+  document.addEventListener('mousedown', e => { if (menu && !menu.contains(e.target)) close(); });
+  document.addEventListener('keydown', e => {
+    if (!menu) return;
+    const bs = [...menu.querySelectorAll('button[data-a]')], i = bs.findIndex(b => b.classList.contains('kb'));
+    if (e.key === 'Escape') { close(); e.preventDefault(); }
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault(); bs.forEach(b => b.classList.remove('kb'));
+      bs[(i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].classList.add('kb');
+    } else if (e.key === 'Enter' && i >= 0) { e.preventDefault(); bs[i].click(); }
+  }, true);
+  window.addEventListener('scroll', e => { if (menu && !menu.contains(e.target)) close(); }, true);
+  window.addEventListener('resize', close); window.addEventListener('blur', close);
+})();
+
+/* ---------- وب‌کم ---------- */
+(function () {
+  let key = '';
+  const ids = ['wcFacing', 'wcQ', 'wcFps', 'wcFit', 'wcRot', 'wcMirror'];
+  const saved = (() => { try { return JSON.parse(lsGet('pb_webcam') || '{}'); } catch (e) { return {}; } })();
+  ids.forEach(id => { const el = $('#' + id); if (saved[id] !== undefined) { if (el.type === 'checkbox') el.checked = saved[id]; else el.value = saved[id]; } });
+  function url() {
+    const q = new URLSearchParams({k: key, facing: $('#wcFacing').value, q: $('#wcQ').value, fps: $('#wcFps').value, fit: $('#wcFit').value});
+    if ($('#wcRot').value !== '0') q.set('rot', $('#wcRot').value);
+    if ($('#wcMirror').checked) q.set('mirror', '1');
+    return location.origin + '/webcam?' + q;
+  }
+  function upd() {
+    const o = {}; ids.forEach(id => { const el = $('#' + id); o[id] = el.type === 'checkbox' ? el.checked : el.value; });
+    lsSet('pb_webcam', JSON.stringify(o));
+    $('#wcUrl').value = key ? url() : '…';
+  }
+  ids.forEach(id => $('#' + id).addEventListener('change', upd));
+  async function open() {
+    $('#wcModal').classList.remove('hidden');
+    try { key = (await api('/api/webcam')).key; } catch (e) { if (!(e instanceof AuthError)) toast(e.message); }
+    upd();
+  }
+  $('#camWebcam').onclick = open;
+  $('#wcClose').onclick = () => $('#wcModal').classList.add('hidden');
+  $('#wcModal').addEventListener('click', e => { if (e.target.id === 'wcModal') $('#wcModal').classList.add('hidden'); });
+  $('#wcCopy').onclick = () => copy($('#wcUrl').value);
+  $('#wcUrl').onclick = e => e.target.select();
+  $('#wcTest').onclick = () => window.open(url(), 'pbwebcam', 'width=960,height=540');
+  $('#wcNewKey').onclick = async e => {
+    e.preventDefault();
+    if (!confirm('لینک جدید ساخته شود؟ لینکی که الان در OBS است دیگر کار نمی‌کند.')) return;
+    try { key = (await api('/api/webcam', {method: 'POST', body: JSON.stringify({action: 'newkey'})})).key; upd(); toast('لینک جدید ساخته شد — در OBS عوضش کنید'); } catch (err) {}
+  };
+})();
+</script>
+</body>
+</html>
