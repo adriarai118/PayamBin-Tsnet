@@ -144,3 +144,14 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   API 26+ anyway; TailscaleManager already guarded for API < 26).
   Consequence: this build no longer installs on Android 5-7.1
   (API 23-25). Only the separate PayamBin-Tsnet repo is affected.
+
+## Side-by-side — 20 Nov 2026
+- User reported the v19 APK wanted to update (replace) the original
+  PayamBin instead of installing alongside it (same applicationId).
+  Fix in the separate repo only: applicationId ->
+  com.adriarai.payambin.tsnet; app label -> "پیام‌بین Tsnet";
+  FileProvider authority -> ...tsnet.files (manifest + FilesProvider);
+  Mdns HOST -> payambin-tsnet.local; default Tailscale hostname ->
+  payambin-tsnet; Updater API -> PayamBin-Tsnet releases.
+  Java package/namespace unchanged. Both apps listen on port 8080,
+  so do not run both servers at the same time.
