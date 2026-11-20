@@ -11,6 +11,9 @@ import android.provider.Settings;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /** کنترل گوشی از کامپیوتر: لمس، کشیدن، اسکرول، دکمه‌های سیستم و تایپ */
 public class ControlService extends AccessibilityService {
     public static volatile ControlService instance;
@@ -37,6 +40,171 @@ public class ControlService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        try {
+            int t = event.getEventType();
+            if (t != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                    && t != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
+            CharSequence p = event.getPackageName();
+            if (p == null || !isChatPkg(p.toString())) return;
+            long now = System.currentTimeMillis();
+            if (now - lastAutoAt < 2000) return;
+            lastAutoAt = now;
+            JSONObject snap = snapshot();
+            if (snap.optBoolean("ok")) { lastChat = snap; lastChatAt = now; }
+        } catch (Exception ignored) {
+        }
+    }
+
+    // ---------------- خواندن گفتگوی باز (واتس‌اپ، تلگرام، …) ----------------
+    // فقط متن‌هایی خوانده می‌شوند که روی صفحه دیده می‌شوند؛ دیتابیس پیام‌رسان
+    // خوانده نمی‌شود. جهت پیام (ارسالی/دریافتی) از جای حباب روی صفحه حدس زده
+    // می‌شود و در زبان راست‌به‌چپ برعکس است.
+
+    /** بسته‌های پیام‌رسان شناخته‌شده؛ خواندن دستی برای هر برنامه‌ی جلوی صفحه کار می‌کند */
+    private static final String[] CHAT_PKGS = {
+            "com.whatsapp", "com.whatsapp.w4b",
+            "org.telegram.messenger", "org.telegram.messenger.web"};
+
+    private static boolean isChatPkg(String pkg) {
+        for (String p : CHAT_PKGS) if (p.equals(pkg)) return true;
+        return false;
+    }
+
+    public static volatile JSONObject lastChat = null;
+    public static volatile long lastChatAt = 0;
+    private static long lastAutoAt = 0;
+    private static String accumKey = "";
+    private static final java.util.ArrayList<JSONObject> accum = new java.util.ArrayList<>();
+    private static final java.util.HashSet<String> accumSeen = new java.util.HashSet<>();
+
+    /** خواندن پیام‌های روی صفحه‌ی فعلی */
+    public static JSONObject readNow() {
+        ControlService s = instance;
+        if (s == null) return J.obj("ok", false, "error", "سرویس دسترسی‌پذیری فعال نیست");
+        return s.snapshot();
+    }
+
+    /** اسکرول به بالا (پیام‌های قدیمی‌تر) و خواندن؛ پیام‌ها در انباشته نگه داشته می‌شوند */
+    public static JSONObject more() {
+        ControlService s = instance;
+        if (s == null) return J.obj("ok", false, "error", "سرویس دسترسی‌پذیری فعال نیست");
+        try {
+            AccessibilityNodeInfo root = s.getRootInActiveWindow();
+            AccessibilityNodeInfo sc = findScrollable(root);
+            if (sc == null) return J.obj("ok", false, "error", "لیست قابل اسکرول پیدا نشد؛ گفتگو را باز کنید");
+            sc.performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            try { Thread.sleep(700); } catch (InterruptedException ignored) {}
+        } catch (Exception e) {
+            return J.obj("ok", false, "error", e.getMessage());
+        }
+        JSONObject snap = s.snapshot();
+        if (!snap.optBoolean("ok")) return snap;
+        String key = snap.optString("pkg") + "|" + snap.optString("title");
+        if (!key.equals(accumKey)) { accumKey = key; accum.clear(); accumSeen.clear(); }
+        JSONArray arr = snap.optJSONArray("messages");
+        java.util.ArrayList<JSONObject> older = new java.util.ArrayList<>();
+        if (arr != null) for (int i = 0; i < arr.length(); i++) {
+            JSONObject m = arr.optJSONObject(i);
+            if (m == null) continue;
+            String k = m.optString("text") + "|" + (m.optBoolean("out") ? "o" : "i");
+            if (accumSeen.add(k)) older.add(m);
+        }
+        accum.addAll(0, older);
+        return J.obj("ok", true, "pkg", snap.optString("pkg"), "app", snap.optString("app"),
+                "title", snap.optString("title"), "messages", new JSONArray(accum),
+                "count", accum.size(), "at", System.currentTimeMillis());
+    }
+
+    private JSONObject snapshot() {
+        AccessibilityNodeInfo root;
+        try { root = getRootInActiveWindow(); } catch (Exception e) {
+            return J.obj("ok", false, "error", "خواندن صفحه ممکن نشد: " + e.getMessage());
+        }
+        if (root == null) return J.obj("ok", false, "error", "پنجره‌ای باز نیست");
+        String pkg = root.getPackageName() == null ? "" : root.getPackageName().toString();
+        android.graphics.Rect rb = new android.graphics.Rect();
+        root.getBoundsInScreen(rb);
+        int w = Math.max(1, rb.width()), h = Math.max(1, rb.height());
+        boolean rtl = getResources().getConfiguration().getLayoutDirection()
+                == android.view.View.LAYOUT_DIRECTION_RTL;
+        java.util.ArrayList<JSONObject> msgs = new java.util.ArrayList<>();
+        java.util.HashSet<String> seen = new java.util.HashSet<>();
+        String[] title = {""};
+        collect(root, w, h, rtl, msgs, seen, title);
+        msgs.sort((a, b) -> Integer.compare(a.optInt("y"), b.optInt("y")));
+        JSONObject snap = J.obj("ok", true, "pkg", pkg, "app", appLabel(pkg), "title", title[0],
+                "messages", new JSONArray(msgs), "count", msgs.size(), "at", System.currentTimeMillis());
+        lastChat = snap;
+        lastChatAt = System.currentTimeMillis();
+        return snap;
+    }
+
+    private void collect(AccessibilityNodeInfo n, int w, int h, boolean rtl,
+                         java.util.ArrayList<JSONObject> msgs, java.util.HashSet<String> seen, String[] title) {
+        if (n == null) return;
+        try {
+            CharSequence t = n.getText();
+            if (t != null) {
+                String text = t.toString().trim();
+                if (!text.isEmpty() && text.length() <= 2000 && !n.isEditable()) {
+                    android.graphics.Rect r = new android.graphics.Rect();
+                    n.getBoundsInScreen(r);
+                    int cx = r.centerX(), top = r.top;
+                    if (top < h * 0.08 && title[0].isEmpty()) {
+                        title[0] = text; // بالای صفحه: نام گفتگو
+                    } else if (top > h * 0.08 && top < h * 0.88) {
+                        if (!text.matches("\\d{1,2}:\\d{2}(:\\d{2})?")) { // ساعت خالص پیام نیست
+                            String side = cx < w * 0.42 ? "left" : cx > w * 0.58 ? "right" : "center";
+                            if (!side.equals("center")) { // وسط صفحه: سربرگ تاریخ و مانند آن
+                                String key = text + "|" + top;
+                                if (seen.add(key)) {
+                                    boolean out = rtl ? side.equals("left") : side.equals("right");
+                                    msgs.add(J.obj("text", text, "out", out, "side", side, "y", top));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < n.getChildCount(); i++) collect(n.getChild(i), w, h, rtl, msgs, seen, title);
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** بزرگ‌ترین گره‌ی قابل اسکرول (لیست پیام‌ها) */
+    private static AccessibilityNodeInfo findScrollable(AccessibilityNodeInfo n) {
+        if (n == null) return null;
+        AccessibilityNodeInfo best = null;
+        int bestArea = 0;
+        java.util.ArrayDeque<AccessibilityNodeInfo> st = new java.util.ArrayDeque<>();
+        st.push(n);
+        while (!st.isEmpty()) {
+            AccessibilityNodeInfo c = st.pop();
+            try {
+                if (c.isScrollable()) {
+                    android.graphics.Rect r = new android.graphics.Rect();
+                    c.getBoundsInScreen(r);
+                    int area = r.width() * r.height();
+                    if (area > bestArea) { bestArea = area; best = c; }
+                }
+                for (int i = 0; i < c.getChildCount(); i++) {
+                    AccessibilityNodeInfo ch = c.getChild(i);
+                    if (ch != null) st.push(ch);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return best;
+    }
+
+    private String appLabel(String pkg) {
+        try {
+            android.content.pm.PackageManager pm = getPackageManager();
+            CharSequence l = pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0));
+            return l == null ? pkg : l.toString();
+        } catch (Exception e) {
+            return pkg;
+        }
     }
 
     @Override
