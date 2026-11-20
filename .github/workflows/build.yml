@@ -32,6 +32,7 @@ jobs:
           cd tsnet/go
           go mod tidy
           go vet ./...
+          mkdir -p ../../app/libs
           gomobile bind -target=android -androidapi 26 \
             -javapkg=com.adriarai.payambin.tsnet \
             -o ../../app/libs/tsnet.aar .
