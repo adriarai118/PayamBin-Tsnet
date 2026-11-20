@@ -1807,6 +1807,7 @@ let scrPollT = null, scrCtlWarned = false;
 function scrMsgText(c) {
   switch (c.state) {
     case 'waiting_tap': return '📱 روی گوشی اعلان «🖥 کامپیوتر می‌خواهد صفحه‌ی گوشی را ببیند» را لمس کنید<small style="display:block;opacity:.75;margin-top:6px">و در پنجره‌ی اندروید «شروع» (Start now) را بزنید — اندروید برای ضبط صفحه هر بار اجازه می‌خواهد</small>';
+    case 'ready': return '✅ صفحه آماده است<br><small style="display:block;opacity:.75;margin-top:6px">بدون نیاز به تأیید روی گوشی وصل می‌شود — «▶ شروع» را بزنید</small>';
     case 'error': return '⚠️ ' + esc(c.error || 'خطا');
     case 'on': return st.scrViewing ? '' : 'در حال اتصال…';
     default: return 'صفحه‌ی گوشی به اشتراک گذاشته نشده<small style="display:block;opacity:.75;margin-top:6px">«▶ شروع» را بزنید</small>';
