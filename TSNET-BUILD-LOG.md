@@ -178,3 +178,21 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   stayed true, so Start() could never retry; it is now cleared on
   terminal errors. go vet PASS; gomobile bind rebuilt the AAR (61 MB);
   manual APK build + apksigner verify OK.
+
+## 20 Nov 2026 — /sys/class/net هم روی گوشی مصطفی بسته است؛ لیست از جاوا می‌آید
+- اسکرین‌شات ساعت 08:58: خطا عوض شد و شد
+  `tsnet.Up: tsnet: read /sys/class/net: open /sys/class/net: permission denied`
+  یعنی بیلد v26 (با اصلاح netlink) نصب شده و getter اجرا می‌شود، اما
+  روی این گوشی حتی خواندن دایرکتوری /sys/class/net هم ممنوع است.
+- راه‌حل (همان راه برنامهٔ رسمی Tailscale): لیست اینترفیس‌ها از API
+  اندروید گرفته می‌شود. TailscaleManager.collectInterfacesJson() با
+  java.net.NetworkInterface.getNetworkInterfaces() لیست را می‌سازد
+  (نام، index، MTU، MAC، up/loopback، آدرس‌ها با prefix length) و
+  قبل از Start با setInterfacesJSON به Go می‌دهد.
+- Go: تابع صادرشدهٔ SetInterfacesJSON در tsnet/go/android_ifaces.go
+  JSON را parse و cache می‌کند؛ getter اول cache جاوا را برمی‌گرداند
+  و فقط اگر خالی بود سراغ /sys + ioctl می‌رود.
+- بررسی: go vet PASS؛ gomobile bind PASS؛ javap متد
+  setInterfacesJSON را در Tsnetmobile نشان می‌دهد؛ بیلد دستی
+  MANUAL_BUILD_OK و apksigner verify OK (package
+  com.adriarai.payambin.tsnet).
