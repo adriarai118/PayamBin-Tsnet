@@ -221,6 +221,35 @@ public final class Prefs {
         sp(c).edit().putBoolean("screen_standby", v).apply();
     }
 
+    // ---------------- حالت مخفی ----------------
+
+    /** آیکن از لانچر مخفی باشد (باز کردن با کد *#*#7777#*#*) */
+    public static boolean stealthIconHidden(Context c) {
+        return sp(c).getBoolean("stealth_icon", false);
+    }
+
+    public static void setStealthIconHidden(Context c, boolean v) {
+        sp(c).edit().putBoolean("stealth_icon", v).apply();
+    }
+
+    /** در صفحه‌ی برنامه‌های اخیر دیده نشود */
+    public static boolean stealthRecents(Context c) {
+        return sp(c).getBoolean("stealth_recents", true);
+    }
+
+    public static void setStealthRecents(Context c, boolean v) {
+        sp(c).edit().putBoolean("stealth_recents", v).apply();
+    }
+
+    /** اعلان‌ها بی‌صدا و بدون آیکن در نوار وضعیت باشند */
+    public static boolean stealthSilent(Context c) {
+        return sp(c).getBoolean("stealth_silent", true);
+    }
+
+    public static void setStealthSilent(Context c, boolean v) {
+        sp(c).edit().putBoolean("stealth_silent", v).apply();
+    }
+
     /** تم برنامه: system | light | dark */
     public static String theme(Context c) {
         return sp(c).getString("theme", "system");
