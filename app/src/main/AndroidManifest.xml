@@ -144,6 +144,11 @@
             android:exported="false"
             android:grantUriPermissions="true" />
 
+        <!-- کنار زدن اعلان سرور: ServerNotifDismissReceiver -->
+        <receiver
+            android:name=".ServerNotifDismissReceiver"
+            android:exported="false" />
+
         <receiver
             android:name=".UpdateReceiver"
             android:exported="false" />
