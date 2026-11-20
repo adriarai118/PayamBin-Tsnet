@@ -24,6 +24,7 @@
 package tsnetmobile
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/netip"
@@ -49,6 +50,108 @@ func registerAndroidInterfaceGetter() {
 	registerAndroidIfacesOnce.Do(func() {
 		netmon.RegisterInterfaceGetter(androidInterfaces)
 	})
+}
+
+// ---- Layer 1: interfaces supplied by the Java side (primary) ----
+// The Java side collects them with java.net.NetworkInterface (which
+// works for ordinary apps) and hands them to Go as JSON via
+// SetInterfacesJSON before Start(). On some devices even reading
+// /sys/class/net is denied ("open /sys/class/net: permission denied"),
+// so this layer is what actually makes it work there.
+
+var (
+	javaIfacesMu sync.Mutex
+	javaIfaces   []netmon.Interface
+)
+
+type javaIfaceAddr struct {
+	IP   string `json:"ip"`
+	Bits int    `json:"bits"`
+}
+
+type javaIface struct {
+	Name     string          `json:"name"`
+	Index    int             `json:"index"`
+	MTU      int             `json:"mtu"`
+	HW       string          `json:"hw"`
+	Up       bool            `json:"up"`
+	Loopback bool            `json:"loopback"`
+	Addrs    []javaIfaceAddr `json:"addrs"`
+}
+
+type javaIfaceList struct {
+	Interfaces []javaIface `json:"interfaces"`
+}
+
+// SetInterfacesJSON receives the interface list collected on the Java
+// side and caches it for the netmon getter. Called from
+// TailscaleManager before Start(). Returns "" on success or an error
+// string.
+func SetInterfacesJSON(s string) string {
+	var list javaIfaceList
+	if err := json.Unmarshal([]byte(s), &list); err != nil {
+		return "bad interfaces json: " + err.Error()
+	}
+	if len(list.Interfaces) == 0 {
+		return "empty interfaces list"
+	}
+	var out []netmon.Interface
+	for _, ji := range list.Interfaces {
+		if ji.Name == "" {
+			continue
+		}
+		var flags net.Flags
+		if ji.Up {
+			flags |= net.FlagUp
+		}
+		if ji.Loopback {
+			flags |= net.FlagLoopback
+		} else {
+			flags |= net.FlagBroadcast | net.FlagMulticast
+		}
+		var hw net.HardwareAddr
+		if ji.HW != "" {
+			if mac, err := net.ParseMAC(ji.HW); err == nil {
+				hw = mac
+			}
+		}
+		var addrs []net.Addr
+		for _, a := range ji.Addrs {
+			ip := net.ParseIP(a.IP)
+			if ip == nil {
+				continue
+			}
+			bits := a.Bits
+			if ip.To4() != nil {
+				if bits < 0 || bits > 32 {
+					bits = 32
+				}
+				addrs = append(addrs, &net.IPNet{IP: ip, Mask: net.CIDRMask(bits, 32)})
+			} else {
+				if bits < 0 || bits > 128 {
+					bits = 128
+				}
+				addrs = append(addrs, &net.IPNet{IP: ip, Mask: net.CIDRMask(bits, 128)})
+			}
+		}
+		out = append(out, netmon.Interface{
+			Interface: &net.Interface{
+				Index:        ji.Index,
+				MTU:          ji.MTU,
+				Name:         ji.Name,
+				HardwareAddr: hw,
+				Flags:        flags,
+			},
+			AltAddrs: addrs,
+		})
+	}
+	if len(out) == 0 {
+		return "empty interfaces list"
+	}
+	javaIfacesMu.Lock()
+	javaIfaces = out
+	javaIfacesMu.Unlock()
+	return ""
 }
 
 func readSysfsInt(path string) (int, error) {
@@ -112,7 +215,24 @@ func ipv6AddrsByIndex() map[int][]net.Addr {
 }
 
 // androidInterfaces lists the device's interfaces without netlink.
+// It prefers the list supplied by the Java side (see SetInterfacesJSON);
+// the /sys + ioctl listing below is only a fallback, because on some
+// devices even reading /sys/class/net is denied.
 func androidInterfaces() ([]netmon.Interface, error) {
+	javaIfacesMu.Lock()
+	cached := javaIfaces
+	javaIfacesMu.Unlock()
+	if len(cached) > 0 {
+		out := make([]netmon.Interface, len(cached))
+		copy(out, cached)
+		return out, nil
+	}
+	return androidInterfacesSysfs()
+}
+
+// androidInterfacesSysfs lists interfaces from /sys/class/net, IPv4 via
+// SIOCGIFADDR/SIOCGIFNETMASK ioctls and IPv6 from /proc/net/if_inet6.
+func androidInterfacesSysfs() ([]netmon.Interface, error) {
 	entries, err := os.ReadDir("/sys/class/net")
 	if err != nil {
 		return nil, fmt.Errorf("read /sys/class/net: %w", err)
