@@ -545,6 +545,7 @@ public class MainActivity extends Activity {
                 openAppDetails();
             }
         });
+        para(k, "با همین دسترسی‌پذیری، گفتگوی باز در واتس‌اپ و تلگرام از کامپیوتر خوانده می‌شود (زبانه‌ی اعلان‌ها ← خواندن گفتگو).");
 
         LinearLayout k2 = card();
         heading(k2, "روشن ماندن در پس‌زمینه");
