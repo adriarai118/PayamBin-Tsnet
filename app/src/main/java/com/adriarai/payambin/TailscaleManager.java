@@ -3,9 +3,13 @@ package com.adriarai.payambin;
 import android.content.Context;
 import android.os.Build;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 /**
  * مدیریت گرهٔ Tailscale داخلی (tsnet) برای دسترسی اینترنتی به پیام‌بین.
@@ -42,6 +46,58 @@ public final class TailscaleManager {
         }
     }
 
+    /** لیست اینترفیس‌های شبکه از API اندروید، به‌صورت JSON برای Go.
+     * Go روی اندروید نه netlink دارد و نه همیشه به /sys/class/net
+     * دسترسی دارد؛ این لیست همان چیزی است که netmon لازم دارد. */
+    private static String collectInterfacesJson() {
+        try {
+            JSONObject root = new JSONObject();
+            JSONArray list = new JSONArray();
+            Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+            if (nis != null) {
+                while (nis.hasMoreElements()) {
+                    NetworkInterface ni = nis.nextElement();
+                    JSONObject o = new JSONObject();
+                    o.put("name", ni.getName());
+                    o.put("index", ni.getIndex());
+                    o.put("mtu", ni.getMTU());
+                    byte[] hw = null;
+                    try { hw = ni.getHardwareAddress(); } catch (Throwable ignored) {}
+                    if (hw != null) {
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < hw.length; i++) {
+                            if (i > 0) sb.append(':');
+                            sb.append(String.format("%02x", hw[i] & 0xff));
+                        }
+                        o.put("hw", sb.toString());
+                    } else {
+                        o.put("hw", "");
+                    }
+                    boolean up = false;
+                    boolean loopback = false;
+                    try { up = ni.isUp(); } catch (Throwable ignored) {}
+                    try { loopback = ni.isLoopback(); } catch (Throwable ignored) {}
+                    o.put("up", up);
+                    o.put("loopback", loopback);
+                    JSONArray addrs = new JSONArray();
+                    for (InterfaceAddress ia : ni.getInterfaceAddresses()) {
+                        if (ia == null || ia.getAddress() == null) continue;
+                        JSONObject a = new JSONObject();
+                        a.put("ip", ia.getAddress().getHostAddress());
+                        a.put("bits", ia.getNetworkPrefixLength());
+                        addrs.put(a);
+                    }
+                    o.put("addrs", addrs);
+                    list.put(o);
+                }
+            }
+            root.put("interfaces", list);
+            return root.toString();
+        } catch (Throwable e) {
+            return "{\"interfaces\":[]}";
+        }
+    }
+
     private static Method method(String name, Class<?>... params) throws Exception {
         return Class.forName(GO_CLASS).getMethod(name, params);
     }
@@ -69,6 +125,10 @@ public final class TailscaleManager {
                 String hostname = Prefs.tsnetHostname(app);
                 String authKey = Prefs.tsnetAuthKey(app);
                 String stateDir = app.getFilesDir().getAbsolutePath() + "/tsnet";
+                // لیست اینترفیس‌ها از API اندروید (بدون netlink): Go روی
+                // اندروید نمی‌تواند net.Interfaces() را صدا بزند و حتی
+                // خواندن /sys/class/net هم روی بعضی گوشی‌ها ممنوع است.
+                callString("setInterfacesJSON", collectInterfacesJson());
                 callString("start", hostname, authKey, stateDir, Long.valueOf(Prefs.port(app)));
                 Diag.log("Tailscale شروع شد — " + statusText(app));
             } catch (Throwable e) {
@@ -112,7 +172,7 @@ public final class TailscaleManager {
         }
     }
 
-    /** آدرس اینترنتی پیام‌بین روی tailnet، مثل http://payambin:8080؛ اگر بالا نیست null. */
+    /** آدرس اینترنتی پیام‌بین روی tailnet، مثل http://payambin-tsnet:9191؛ اگر بالا نیست null. */
     public static String address(Context ctx) {
         try {
             JSONObject s = new JSONObject(statusJson(ctx));
