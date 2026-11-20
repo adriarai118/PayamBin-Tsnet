@@ -505,6 +505,7 @@ public class MainActivity extends Activity {
         if (!SmsRepo.has(this, Manifest.permission.READ_SMS)) n++;
         if (!SmsRepo.has(this, Manifest.permission.SEND_SMS)) n++;
         if (!SmsRepo.has(this, Manifest.permission.READ_CONTACTS)) n++;
+        if (!SmsRepo.has(this, Manifest.permission.ACCESS_FINE_LOCATION)) n++;
         if (!SmsRepo.has(this, Manifest.permission.READ_CALL_LOG)) n++;
         if (!NotifListener.isEnabled(this)) n++;
         if (!SmsRepo.ignoringBattery(this)) n++;
@@ -521,6 +522,7 @@ public class MainActivity extends Activity {
         final TextView[] media = statusRow(k, "عکس‌ها و ویدیوها (برای کامپیوتر)", "اجازه", v -> askPerms());
         final TextView[] cam = statusRow(k, "دوربین (پخش زنده برای کامپیوتر)", "اجازه", v -> askPerms());
         final TextView[] mic = statusRow(k, "میکروفون (صدای زنده و ضبط با صدا)", "اجازه", v -> askPerms());
+        final TextView[] loc = statusRow(k, "لوکیشن گوشی (برای کامپیوتر)", "اجازه", v -> askPerms());
         final TextView[] dimRow = statusRow(k, "کم کردن نور گوشی هنگام تماشای صفحه از کامپیوتر", "اجازه", v -> {
             if (Build.VERSION.SDK_INT >= 23) {
                 try {
@@ -578,6 +580,7 @@ public class MainActivity extends Activity {
             setMark(media, MediaRepo.allowed(this));
             setMark(cam, SmsRepo.has(this, Manifest.permission.CAMERA));
             setMark(mic, SmsRepo.has(this, Manifest.permission.RECORD_AUDIO));
+            setMark(loc, SmsRepo.has(this, Manifest.permission.ACCESS_FINE_LOCATION));
             setMark(ctl, ControlService.isEnabled(this));
             setMark(dimRow, ScreenService.canDim(this));
             setMark(notif, NotifListener.isEnabled(this));
@@ -890,6 +893,8 @@ public class MainActivity extends Activity {
         p.add(Manifest.permission.READ_SMS);
         p.add(Manifest.permission.SEND_SMS);
         p.add(Manifest.permission.READ_CONTACTS);
+        p.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        p.add(Manifest.permission.ACCESS_COARSE_LOCATION);
         p.add(Manifest.permission.READ_PHONE_STATE);
         p.add(Manifest.permission.READ_CALL_LOG);
         p.add(Manifest.permission.CAMERA);

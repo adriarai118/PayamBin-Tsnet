@@ -696,6 +696,13 @@ public class WebServer {
             case "/api/calls":
                 return Res.json(PhoneState.calls(ctx, r.qi("limit", 200)));
 
+            case "/api/contacts":
+                if (!SmsRepo.has(ctx, Manifest.permission.READ_CONTACTS)) return Res.err(403, "no READ_CONTACTS permission");
+                return Res.json(ContactsRepo.list(ctx));
+
+            case "/api/location":
+                return Res.json(Loc.now(ctx));
+
             case "/api/apikey":
                 return Res.json(J.obj("key", Prefs.apiKey(ctx)));
 

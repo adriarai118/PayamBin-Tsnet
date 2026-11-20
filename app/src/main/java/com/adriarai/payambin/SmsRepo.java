@@ -256,6 +256,7 @@ public final class SmsRepo {
                 "readSms", has(ctx, Manifest.permission.READ_SMS),
                 "sendSms", has(ctx, Manifest.permission.SEND_SMS),
                 "contacts", has(ctx, Manifest.permission.READ_CONTACTS),
+                "location", has(ctx, Manifest.permission.ACCESS_FINE_LOCATION),
                 "phone", has(ctx, Manifest.permission.READ_PHONE_STATE),
                 "calls", has(ctx, Manifest.permission.READ_CALL_LOG),
                 "notif", NotifListener.isEnabled(ctx),
