@@ -114,3 +114,14 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   proxy to 127.0.0.1:8080 have NOT been verified on a real device.
 - The Gradle/AGP build itself (see "Gradle — FAILED" above): the
   manual build above is the substitute verification in this VM.
+
+## CI fix — 20 Nov 2026 (after run #13 failed)
+- GitHub Actions run #13 (commit 698cf3f) FAILED in "Build tsnet AAR":
+  `gomobile bind requires golang.org/x/mobile in the current module`.
+  Fix: `go get -tool golang.org/x/mobile/cmd/gobind` in tsnet/go —
+  go.mod now has `tool golang.org/x/mobile/cmd/gobind` (x/mobile
+  v0.0.0-20261117202452-47699113848a; also upgraded x/crypto v0.59.0,
+  x/net v0.63.0, x/term v0.48.0, x/text v0.44.0). `go vet ./...` PASS
+  again after the change. Only go.mod/go.sum changed for this fix.
+- Note: releases v8/v9 APKs were only 159 KB — do not trust them as
+  tsnet builds; v9 predates the tsnet code entirely.
