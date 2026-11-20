@@ -150,6 +150,7 @@ public class ServerService extends Service {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        Prefs.setServerNotifDismissed(this, false); // شروع تازه: اعلان یک بار دیده شود
         Diag.init(this);
         Diag.log("— سرویس ساخته شد (pid " + android.os.Process.myPid() + ")");
         ScreenService.restoreBrightnessIfNeeded(this);
@@ -176,9 +177,12 @@ public class ServerService extends Service {
         }
 
         try {
-            Notification n = buildNotification();
-            if (Build.VERSION.SDK_INT >= 34) startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
-            else startForeground(NOTIF_ID, n);
+            // اگر کاربر اعلان را کنار زده و سرویس از قبل در پیش‌زمینه است، دوباره نفرست
+            if (!Prefs.serverNotifDismissed(this) || !running) {
+                Notification n = buildNotification();
+                if (Build.VERSION.SDK_INT >= 34) startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+                else startForeground(NOTIF_ID, n);
+            }
         } catch (Exception e) {
             // مثلاً اجازهٔ شروع از پس‌زمینه داده نشد
             lastError = "شروع سرویس ممکن نشد: " + e.getMessage();
@@ -298,6 +302,8 @@ public class ServerService extends Service {
         PendingIntent open = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), piFlags);
         PendingIntent stop = PendingIntent.getService(this, 1,
                 new Intent(this, ServerService.class).setAction(ACTION_STOP), piFlags);
+        PendingIntent dismissed = PendingIntent.getBroadcast(this, 2,
+                new Intent(this, ServerNotifDismissReceiver.class), piFlags);
 
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, Stealth.fgsChannel(this, CHANNEL)) : legacyBuilder();
         b.setSmallIcon(R.drawable.ic_stat)
@@ -306,6 +312,7 @@ public class ServerService extends Service {
                 .setOngoing(true)
                 .setShowWhen(false)
                 .setContentIntent(open)
+                .setDeleteIntent(dismissed)
                 .addAction(new Notification.Action.Builder(null, "توقف", stop).build());
         return b.build();
     }
@@ -316,6 +323,7 @@ public class ServerService extends Service {
     }
 
     private void updateNotification() {
+        if (Prefs.serverNotifDismissed(this)) return; // کاربر کنار زده؛ دوباره نفرست
         try {
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.notify(NOTIF_ID, buildNotification());
