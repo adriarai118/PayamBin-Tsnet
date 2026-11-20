@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId 'com.adriarai.payambin'
-        minSdk 23
+        minSdk 26 // tsnet (gomobile) به API 26+ نیاز دارد؛ روی اندروید قدیمی‌تر نصب نمی‌شود
         targetSdk 34
         // شمارهٔ نسخه = شمارهٔ اجرای GitHub Actions (برای آپدیت خودکار)
         def run = (System.getenv("GITHUB_RUN_NUMBER") ?: "1") as Integer
