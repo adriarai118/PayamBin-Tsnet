@@ -143,6 +143,12 @@ public class ControlService extends AccessibilityService {
                          java.util.ArrayList<JSONObject> msgs, java.util.HashSet<String> seen, String[] title) {
         if (n == null) return;
         try {
+            // تلگرام: هر سلول پیام (ChatMessageCell) یک پیام است؛ متن‌های داخل
+            // سلول (نام فرستنده، نقل‌قول، ساعت، تیک) جدا خوانده نشوند
+            CharSequence cn = n.getClassName();
+            if (cn != null && cn.toString().contains("ChatMessageCell")) {
+                if (emitCell(n, w, h, rtl, msgs, seen)) return;
+            }
             CharSequence t = n.getText();
             if (t != null) {
                 String text = t.toString().trim();
@@ -153,11 +159,10 @@ public class ControlService extends AccessibilityService {
                     if (top < h * 0.08 && title[0].isEmpty()) {
                         title[0] = text; // بالای صفحه: نام گفتگو
                     } else if (top > h * 0.08 && top < h * 0.88) {
-                        if (!text.matches("\\d{1,2}:\\d{2}(:\\d{2})?")) { // ساعت خالص پیام نیست
+                        if (!isTimeLike(text)) { // ساعت/وضعیت پیام نیست
                             String side = cx < w * 0.42 ? "left" : cx > w * 0.58 ? "right" : "center";
                             if (!side.equals("center")) { // وسط صفحه: سربرگ تاریخ و مانند آن
-                                String key = text + "|" + top;
-                                if (seen.add(key)) {
+                                if (!dupNear(msgs, text, top)) {
                                     boolean out = rtl ? side.equals("left") : side.equals("right");
                                     msgs.add(J.obj("text", text, "out", out, "side", side, "y", top));
                                 }
@@ -167,6 +172,103 @@ public class ControlService extends AccessibilityService {
                 }
             }
             for (int i = 0; i < n.getChildCount(); i++) collect(n.getChild(i), w, h, rtl, msgs, seen, title);
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** همان متن در فاصله‌ی کم عمودی = همان پیام که دو بار در درخت آمده (پدر و فرزند) */
+    private static boolean dupNear(java.util.ArrayList<JSONObject> msgs, String text, int top) {
+        for (JSONObject m : msgs) {
+            if (text.equals(m.optString("text")) && Math.abs(m.optInt("y") - top) < 50) return true;
+        }
+        return false;
+    }
+
+    /** ساعت خالص یا ساعت با تیک خوانده‌شدن؛ پیام نیست */
+    private static boolean isTimeLike(String text) {
+        if (text.matches("\\d{1,2}:\\d{2}(:\\d{2})?")) return true;
+        if (text.matches("\\d{1,2}:\\d{2}\\s*[✓✔]*")) return true;
+        return false;
+    }
+
+    /** یک سلول پیام تلگرام را به یک پیام تبدیل می‌کند؛ false یعنی سلول متن
+     *  قابل‌خواندنی نداشت و باید مثل بقیه‌ی گره‌ها خوانده شود */
+    private boolean emitCell(AccessibilityNodeInfo cell, int w, int h, boolean rtl,
+                             java.util.ArrayList<JSONObject> msgs, java.util.HashSet<String> seen) {
+        java.util.ArrayList<String[]> parts = new java.util.ArrayList<>();
+        for (int i = 0; i < cell.getChildCount(); i++) collectCellParts(cell.getChild(i), w, h, parts);
+        if (parts.isEmpty()) return false;
+        String[] best = null;
+        for (String[] p : parts) {
+            if (isTimeLike(p[0])) continue;
+            if (best == null || p[0].length() > best[0].length()) best = p;
+        }
+        if (best == null) return true;
+        int cx = Integer.parseInt(best[1]), top = Integer.parseInt(best[2]);
+        String side = cx < w * 0.42 ? "left" : cx > w * 0.58 ? "right" : "center";
+        if (side.equals("center")) return true;
+        if (dupNear(msgs, best[0], top)) return true;
+        boolean out = rtl ? side.equals("left") : side.equals("right");
+        msgs.add(J.obj("text", best[0], "out", out, "side", side, "y", top));
+        return true;
+    }
+
+    private void collectCellParts(AccessibilityNodeInfo n, int w, int h, java.util.ArrayList<String[]> parts) {
+        if (n == null) return;
+        try {
+            CharSequence t = n.getText();
+            if (t != null) {
+                String text = t.toString().trim();
+                if (!text.isEmpty() && text.length() <= 2000 && !n.isEditable()) {
+                    android.graphics.Rect r = new android.graphics.Rect();
+                    n.getBoundsInScreen(r);
+                    int top = r.top;
+                    if (top > h * 0.08 && top < h * 0.88) {
+                        parts.add(new String[]{text, String.valueOf(r.centerX()), String.valueOf(top)});
+                    }
+                }
+            }
+            for (int i = 0; i < n.getChildCount(); i++) collectCellParts(n.getChild(i), w, h, parts);
+        } catch (Exception ignored) {
+        }
+    }
+
+    /** تخلیه‌ی خام درخت دسترسی‌پذیری برای عیب‌یابی (تلگرام و …) */
+    public static JSONObject dumpTree() {
+        ControlService s = instance;
+        if (s == null) return J.obj("ok", false, "error", "سرویس دسترسی‌پذیری فعال نیست");
+        AccessibilityNodeInfo root;
+        try { root = s.getRootInActiveWindow(); } catch (Exception e) {
+            return J.obj("ok", false, "error", e.getMessage());
+        }
+        if (root == null) return J.obj("ok", false, "error", "پنجره‌ای باز نیست");
+        String pkg = root.getPackageName() == null ? "" : root.getPackageName().toString();
+        java.util.ArrayList<String> lines = new java.util.ArrayList<>();
+        dumpNode(root, 0, lines);
+        return J.obj("ok", true, "pkg", pkg, "lines", new JSONArray(lines), "count", lines.size());
+    }
+
+    private static void dumpNode(AccessibilityNodeInfo n, int depth, java.util.ArrayList<String> lines) {
+        if (n == null || lines.size() >= 300 || depth > 12) return;
+        try {
+            CharSequence cn = n.getClassName();
+            CharSequence t = n.getText();
+            String text = t == null ? "" : t.toString().replace("\n", "\\n");
+            if (text.length() > 120) text = text.substring(0, 120) + "…";
+            boolean interesting = !text.isEmpty()
+                    || (cn != null && cn.toString().contains("ChatMessageCell"));
+            if (interesting) {
+                android.graphics.Rect r = new android.graphics.Rect();
+                n.getBoundsInScreen(r);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < depth; i++) sb.append("  ");
+                sb.append(cn == null ? "?" : cn)
+                        .append(" [").append(r.left).append(",").append(r.top)
+                        .append(",").append(r.right).append(",").append(r.bottom).append("]");
+                if (!text.isEmpty()) sb.append(" text=").append(text);
+                lines.add(sb.toString());
+            }
+            for (int i = 0; i < n.getChildCount(); i++) dumpNode(n.getChild(i), depth + 1, lines);
         } catch (Exception ignored) {
         }
     }
