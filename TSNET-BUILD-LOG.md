@@ -236,3 +236,25 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
 - بررسی: go vet PASS؛ gomobile bind PASS؛ بیلد دستی
   MANUAL_BUILD_OK و apksigner verify OK (sdkVersion 26،
   targetSdkVersion 34).
+
+## 20 Nov 2026 — APK دستی: «ماژول Tailscale ساخته نشده است»
+- علت: اسکریپت manual-build.sh در مرحلهٔ d8 فقط classes.jar خود
+  برنامه را dex می‌کرد؛ classes.jar داخل AAR (کلاس‌های جاوای
+  gomobile: Tsnetmobile و Seq) هیچ‌وقت dex نمی‌شد. پس APK دستی
+  libgojni.so را داشت ولی کلاس جاوا برای لود کردنش را نه؛
+  isAvailable() همیشه false بود. در واقع هیچ‌کدام از APKهای دستی
+  تا اینجا ماژول Tailscale را نداشتند و همهٔ تست‌های واقعی با
+  بیلدهای CI انجام شده بود.
+- اصلاح: ‎$WORK/aar/classes.jar هم به d8 داده شد؛ حالا descriptor
+  کلاس Tsnetmobile در classes.dex هست و apksigner verify OK است.
+
+## 20 Nov 2026 — panic: no safe place found to store log state
+- با recover، دلیل کرش در خود برنامه دیده شد: موقع Up،
+  ipnlocal صدا می‌زند logpolicy.LogsDir و روی اندروید هیچ‌جا
+  برای لاگ نیست (نه ‎$HOME، نه ‎/tmp، و cwd هم ‎/ است)؛
+  MkdirTemp هم شکست می‌خورد و panic می‌داد.
+- اصلاح: قبل از Up در runNode، ‎$TS_LOGS_DIR و ‎$TMPDIR به
+  پوشهٔ state خود برنامه (files/tsnet) اشاره می‌کنند —
+  همان escape hatch خود Tailscale.
+- بررسی: go vet PASS؛ gomobile bind PASS؛ بیلد دستی
+  MANUAL_BUILD_OK و apksigner verify OK.
