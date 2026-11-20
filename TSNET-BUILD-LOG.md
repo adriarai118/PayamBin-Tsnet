@@ -155,3 +155,26 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   payambin-tsnet; Updater API -> PayamBin-Tsnet releases.
   Java package/namespace unchanged. Both apps listen on port 8080,
   so do not run both servers at the same time.
+
+## Port change — 20 Nov 2026
+- User asked for a different port, e.g. 9191. Default web port in the
+  Tsnet build is now 9191 (was 8080) and default proxy port 9192
+  (was 8888), in Prefs.java only — WebServer, ServerService display
+  and the tsnet listener/proxy all read Prefs.port, so one change
+  covers LAN + tailnet. Both apps can now run at the same time.
+
+## netlink fix — 20 Nov 2026 (Tailscale "permission denied" on the phone)
+- The phone showed `tsnet.Up: tsnet: route ip+net: netlinkrib:
+  permission denied`. This is NOT an auth-key problem: since Android
+  11 an ordinary app UID cannot bind a NETLINK_ROUTE socket, so Go's
+  net.Interfaces() fails (golang/go#40569), and tsnet's netmon calls
+  it during Up() (netmon.New -> interfaceState) — fatal.
+- Fix in tsnet/go/android_ifaces.go: register Tailscale's own escape
+  hatch, netmon.RegisterInterfaceGetter, with a getter that uses no
+  netlink at all — interface list from /sys/class/net, IPv4 via
+  SIOCGIFADDR/SIOCGIFNETMASK ioctls, IPv6 from /proc/net/if_inet6,
+  addresses as netmon.Interface.AltAddrs. Registered only on Android.
+  Also fixed a latent bug: after an Up() error the Go `running` flag
+  stayed true, so Start() could never retry; it is now cleared on
+  terminal errors. go vet PASS; gomobile bind rebuilt the AAR (61 MB);
+  manual APK build + apksigner verify OK.

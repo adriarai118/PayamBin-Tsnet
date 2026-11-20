@@ -154,3 +154,18 @@ export JAVA_HOME=$HOME/workspace/toolchains/jdk17
   نه ریپوی اصلی.
 - توجه: هر دو برنامه روی پورت 8080 گوش می‌دهند؛ پس هر دو را هم‌زمان
   روشن نکنید — دومی پورت را نمی‌گیرد.
+
+## پورت جدا (9191)
+پورت پیش‌فرض وب‌سرور در این بیلد 9191 است (نه 8080 نسخهٔ اصلی) و
+پورت پروکسی 9192 (نه 8888) — پس هر دو برنامه می‌توانند هم‌زمان روشن
+باشند. آدرس‌ها: LAN روی `http://payambin-tsnet.local:9191` و روی
+tailnet روی `http://payambin-tsnet:9191`. پورت از تنظیمات برنامه هم
+قابل تغییر است.
+
+## چرا روی گوشی «permission denied» می‌داد
+اندروید ۱۱ به بعد به برنامه‌های معمولی اجازه‌ی netlink نمی‌دهد و
+`net.Interfaces()` در Go با خطای `route ip+net: netlinkrib: permission
+denied` می‌میرد؛ tsnet موقع بالا آمدن همان را صدا می‌زند. ربطی به
+کلید ورود ندارد. راه‌حل: `tsnet/go/android_ifaces.go` با
+`netmon.RegisterInterfaceGetter` لیست اینترفیس‌ها را بدون netlink
+(ioctl + ‎`/sys/class/net` + ‎`/proc/net/if_inet6`) می‌سازد.
