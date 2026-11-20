@@ -250,6 +250,15 @@ public final class Prefs {
         sp(c).edit().putBoolean("stealth_silent", v).apply();
     }
 
+    /** کاربر اعلان سرور را کنار زده است؛ تا شروع تازه‌ی سرویس دوباره فرستاده نشود */
+    public static boolean serverNotifDismissed(Context c) {
+        return sp(c).getBoolean("server_notif_dismissed", false);
+    }
+
+    public static void setServerNotifDismissed(Context c, boolean v) {
+        sp(c).edit().putBoolean("server_notif_dismissed", v).apply();
+    }
+
     /** تم برنامه: system | light | dark */
     public static String theme(Context c) {
         return sp(c).getString("theme", "system");
