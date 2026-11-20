@@ -45,7 +45,7 @@
 
     <application
         android:name=".App"
-        android:label="پیام‌بین"
+        android:label="پیام‌بین Tsnet"
         android:icon="@drawable/ic_launcher"
         android:roundIcon="@drawable/ic_launcher"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
@@ -103,7 +103,7 @@
         <service
             android:name=".NotifListener"
             android:exported="true"
-            android:label="پیام‌بین"
+            android:label="پیام‌بین Tsnet"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
@@ -131,7 +131,7 @@
 
         <provider
             android:name=".FilesProvider"
-            android:authorities="com.adriarai.payambin.files"
+            android:authorities="com.adriarai.payambin.tsnet.files"
             android:exported="false"
             android:grantUriPermissions="true" />
 
