@@ -125,3 +125,12 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   again after the change. Only go.mod/go.sum changed for this fix.
 - Note: releases v8/v9 APKs were only 159 KB — do not trust them as
   tsnet builds; v9 predates the tsnet code entirely.
+
+## CI fix 2 — 20 Nov 2026 (runs #14/#15 failed)
+- Run #15 (commit 5fad148, after the gobind tool fix) FAILED in
+  "Build tsnet AAR" (10m 56s): `gomobile: open ../../app/libs/tsnet.aar:
+  no such file or directory`. Cause: app/libs/ does not exist in a
+  fresh checkout (the AAR is a build artifact, not committed), and
+  gomobile bind does not create the output directory.
+  Fix: `mkdir -p ../../app/libs` in the workflow before gomobile bind.
+  Run #14 (commit 1c3efe6) failed the same way (11m 45s).
