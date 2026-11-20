@@ -110,7 +110,21 @@ func Start(hostname, authKey, stateDir string, localPort int) string {
 }
 
 // runNode is the background goroutine that owns the tsnet server.
+// A panic anywhere in the tsnet stack (e.g. inside Up()) would
+// otherwise kill the whole app (SIGABRT) with no message in the UI.
+// Recover it and report it as a status error instead, so the user
+// sees the reason in the app and can send it back.
 func runNode(hostname, authKey, stateDir string, localPort int) {
+	defer func() {
+		if r := recover(); r != nil {
+			mu.Lock()
+			cur.State = "error"
+			cur.Error = fmt.Sprintf("panic: %v", r)
+			cur.LoginURL = ""
+			running = false
+			mu.Unlock()
+		}
+	}()
 	ctx, cancelFn := context.WithCancel(context.Background())
 	mu.Lock()
 	cancel = cancelFn
@@ -199,6 +213,7 @@ func runNode(hostname, authKey, stateDir string, localPort int) {
 // pollStatus refreshes the login URL / IP from the local client until the
 // node is running or the context is cancelled.
 func pollStatus(s *tailtsnet.Server, ctx context.Context) {
+	defer func() { _ = recover() }() // never let the watcher kill the app
 	t := time.NewTicker(2 * time.Second)
 	defer t.Stop()
 	for {

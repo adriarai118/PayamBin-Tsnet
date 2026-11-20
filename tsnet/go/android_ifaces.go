@@ -184,6 +184,9 @@ func ipv6AddrsByIndex() map[int][]net.Addr {
 		if len(f) < 6 {
 			continue
 		}
+		if len(f[0]) != 32 {
+			continue
+		}
 		var raw [16]byte
 		ok := true
 		for i := 0; i < 16; i++ {
