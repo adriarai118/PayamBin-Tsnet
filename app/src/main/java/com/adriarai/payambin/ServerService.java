@@ -35,6 +35,7 @@ public class ServerService extends Service {
     private static final int NOTIF_ID = 1;
 
     public static volatile boolean running = false;
+    private static ServerService instance;
     public static volatile String lastError = null;
 
     private WebServer server;
@@ -148,15 +149,17 @@ public class ServerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
         Diag.init(this);
         Diag.log("— سرویس ساخته شد (pid " + android.os.Process.myPid() + ")");
         ScreenService.restoreBrightnessIfNeeded(this);
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel ch = new NotificationChannel(CHANNEL, "سرور پیام‌بین", NotificationManager.IMPORTANCE_LOW);
-            ch.setShowBadge(false);
-            NotificationManager nm = getSystemService(NotificationManager.class);
-            if (nm != null) nm.createNotificationChannel(ch);
-        }
+        Stealth.ensureChannels(this);
+    }
+
+    /** بعد از تغییر کانال اعلان، اعلان فعلی را دوباره بفرست */
+    public static void repost() {
+        ServerService s = instance;
+        if (s != null) s.updateNotification();
     }
 
     @Override
@@ -296,7 +299,7 @@ public class ServerService extends Service {
         PendingIntent stop = PendingIntent.getService(this, 1,
                 new Intent(this, ServerService.class).setAction(ACTION_STOP), piFlags);
 
-        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CHANNEL) : legacyBuilder();
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, Stealth.fgsChannel(this, CHANNEL)) : legacyBuilder();
         b.setSmallIcon(R.drawable.ic_stat)
                 .setContentTitle("پیام‌بین روشن است")
                 .setContentText(text)
@@ -322,6 +325,7 @@ public class ServerService extends Service {
 
     @Override
     public void onDestroy() {
+        instance = null;
         Diag.log("سرویس متوقف شد");
         try {
             if (sysReceiver != null) unregisterReceiver(sysReceiver);
