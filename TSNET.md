@@ -177,3 +177,10 @@ denied` می‌میرد؛ tsnet موقع بالا آمدن همان را صدا 
 `NetworkInterface.getNetworkInterfaces()` لیست را جمع می‌کند و قبل از
 شروع، با `SetInterfacesJSON` به Go می‌دهد؛ getter همین لیستِ cacheشده
 را برمی‌گرداند و /sys فقط fallback است.
+
+### اصلاح سوم (20 Nov 2026): تکنیک خودِ PayamBin
+`collectInterfacesJson` اول یک استثنا (مثلاً `getMTU`) را می‌خورد و
+کل لیست خالی برمی‌گشت؛ حالا عین `Net.localIps` برای هر اینترفیس
+try/catch جدا دارد و prefix را با fallback ‎/32 یا /128 می‌گذارد.
+گوشی اندروید ۱۶ است و API رسمی `NetworkInterface` تنها راه درست
+برای لیست کارت شبکه است.
