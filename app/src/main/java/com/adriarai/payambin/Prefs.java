@@ -32,7 +32,7 @@ public final class Prefs {
     }
 
     public static int port(Context c) {
-        return sp(c).getInt("port", 8080);
+        return sp(c).getInt("port", 9191); // جدا از نسخهٔ اصلی (8080)، تا هر دو هم‌زمان روشن شوند
     }
 
     public static void setPort(Context c, int port) {
@@ -145,7 +145,7 @@ public final class Prefs {
     }
 
     public static int proxyPort(Context c) {
-        return sp(c).getInt("proxy_port", 8888);
+        return sp(c).getInt("proxy_port", 9192); // جدا از نسخهٔ اصلی (8888)
     }
 
     public static void setProxyPort(Context c, int p) {
@@ -172,12 +172,12 @@ public final class Prefs {
 
     /** نام دستگاه در tailnet، مثل payambin */
     public static String tsnetHostname(Context c) {
-        String h = sp(c).getString("tsnet_hostname", "payambin");
-        return h == null || h.trim().isEmpty() ? "payambin" : h.trim();
+        String h = sp(c).getString("tsnet_hostname", "payambin-tsnet");
+        return h == null || h.trim().isEmpty() ? "payambin-tsnet" : h.trim();
     }
 
     public static void setTsnetHostname(Context c, String h) {
-        sp(c).edit().putString("tsnet_hostname", h == null ? "payambin" : h.trim()).apply();
+        sp(c).edit().putString("tsnet_hostname", h == null ? "payambin-tsnet" : h.trim()).apply();
     }
 
     /**
