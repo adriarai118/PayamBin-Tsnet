@@ -807,6 +807,12 @@ public class WebServer {
                 return Res.json(ControlService.more());
             }
 
+            case "/api/chat/tree": {
+                if (!ControlService.isEnabled(ctx)) return Res.json(J.obj("ok", false,
+                        "error", "دسترسی‌پذیری فعال نیست؛ در برنامه ← مجوزها ← «کنترل گوشی» را روشن کنید"));
+                return Res.json(ControlService.dumpTree());
+            }
+
             default:
                 return Res.err(404, "not found");
         }
