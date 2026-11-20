@@ -368,7 +368,8 @@ a>button{color:var(--ink)} a>button.pri{color:#fff} a:has(>button){text-decorati
       <section class="conv">
         <div class="blk" id="chatBox">
           <div class="row1"><b>💬 خواندن گفتگوی باز</b><span class="sn" id="chatMeta"></span></div>
-          <div class="row1"><button id="chatRead" class="pri">📖 خواندن پیام‌های روی صفحه</button><button id="chatMore">⬆ پیام‌های قدیمی‌تر</button></div>
+          <div class="row1"><button id="chatRead" class="pri">📖 خواندن پیام‌های روی صفحه</button><button id="chatMore">⬆ پیام‌های قدیمی‌تر</button><button id="chatTree">🐛 ساختار صفحه (عیب‌یابی)</button></div>
+          <pre id="chatTreeOut" class="hidden" style="direction:ltr;text-align:left;max-height:300px;overflow:auto;font-size:11px;white-space:pre-wrap;background:var(--in);padding:8px;border-radius:8px"></pre>
           <div class="sn">گفتگو را در واتس‌اپ یا تلگرام باز کنید، بعد «خواندن» را بزنید. فقط پیام‌های روی صفحه خوانده می‌شوند؛ «قدیمی‌تر» به بالا اسکرول می‌کند.</div>
           <div class="msgs" id="chatList" style="max-height:320px"></div>
         </div>
@@ -1146,6 +1147,11 @@ function renderChat() {
 }
 $('#chatRead').addEventListener('click', chatRead);
 $('#chatMore').addEventListener('click', chatMore);
+$('#chatTree').addEventListener('click', async () => {
+  let r; try { r = await api('/api/chat/tree'); } catch (e) { toast('خطا'); return; }
+  const o = $('#chatTreeOut'); o.classList.remove('hidden');
+  o.textContent = r.ok ? (r.pkg + '\n' + (r.lines || []).join('\n')) : (r.error || 'خطا');
+});
 const MESSENGERS = {'ir.nasim': 'بله', 'com.whatsapp': 'واتس‌اپ', 'com.whatsapp.w4b': 'واتس‌اپ بیزینس',
   'org.telegram.messenger': 'تلگرام', 'org.thunderdog.challegram': 'تلگرام', 'ir.eitaa.messenger': 'ایتا', 'ir.resaneh1.iptv': 'روبیکا'};
 async function sendReply(id) {
