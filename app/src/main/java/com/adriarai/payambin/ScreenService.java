@@ -165,11 +165,11 @@ public class ScreenService extends Service {
         try {
             NotificationManager nm = (NotificationManager) c.getSystemService(NOTIFICATION_SERVICE);
             if (Build.VERSION.SDK_INT >= 26)
-                nm.createNotificationChannel(new NotificationChannel(CH + "_ask", "درخواست دیدن صفحه", NotificationManager.IMPORTANCE_HIGH));
+                nm.createNotificationChannel(new NotificationChannel(Stealth.askChannel(c, CH + "_ask"), "درخواست دیدن صفحه", Stealth.askImportance(c)));
             PendingIntent pi = PendingIntent.getActivity(c, 11,
                     new Intent(c, ScreenCaptureActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, CH + "_ask") : new Notification.Builder(c);
+            Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, Stealth.askChannel(c, CH + "_ask")) : new Notification.Builder(c);
             b.setSmallIcon(R.drawable.ic_stat)
                     .setContentTitle("🖥 کامپیوتر می‌خواهد صفحه‌ی گوشی را ببیند")
                     .setContentText("لمس کنید و در پنجره‌ی بعد «شروع» را بزنید")
@@ -186,10 +186,13 @@ public class ScreenService extends Service {
     public void onCreate() {
         super.onCreate();
         Diag.init(this);
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationManager nm = getSystemService(NotificationManager.class);
-            if (nm != null) nm.createNotificationChannel(new NotificationChannel(CH, "اشتراک صفحه", NotificationManager.IMPORTANCE_LOW));
-        }
+        Stealth.ensureChannels(this);
+    }
+
+    /** بعد از تغییر کانال اعلان، اعلان فعلی را دوباره بفرست */
+    public static void repost() {
+        ScreenService s = instance;
+        if (s != null) s.updateNotification();
     }
 
     @Override
@@ -258,7 +261,7 @@ public class ScreenService extends Service {
         PendingIntent stop = PendingIntent.getService(this, 12,
                 new Intent(this, ScreenService.class).setAction(ACTION_STOP),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CH) : new Notification.Builder(this);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, Stealth.fgsChannel(this, CH)) : new Notification.Builder(this);
         boolean ready = "ready".equals(state);
         return b.setSmallIcon(R.drawable.ic_stat)
                 .setContentTitle(ready ? "🖥 صفحه آماده‌ی اشتراک است" : "🖥 صفحه‌ی گوشی با کامپیوتر به اشتراک گذاشته شده")
