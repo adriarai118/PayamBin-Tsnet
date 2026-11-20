@@ -1,8 +1,10 @@
 name: Build APK
 
+# ریلیز فقط وقتی ساخته می‌شود که یک ریلیز (برچسب نسخه) منتشر شود؛
+# پوش‌های معمولی روی main دیگر بیلد نمی‌گیرند و نسخه بالا نمی‌رود.
 on:
-  push:
-    branches: [ main, master ]
+  release:
+    types: [published]
   workflow_dispatch: {}
 
 permissions:
@@ -54,9 +56,10 @@ jobs:
           path: PayamBin.apk
 
       - name: Publish release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.run_number }}
-          name: PayamBin v${{ github.run_number }}
+          tag_name: ${{ github.event.release.tag_name }}
+          name: PayamBin ${{ github.event.release.tag_name }}
           files: PayamBin.apk
           make_latest: true
