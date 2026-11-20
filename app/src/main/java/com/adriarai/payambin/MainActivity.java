@@ -827,7 +827,7 @@ public class MainActivity extends Activity {
                 + "• تماس ورودی و فهرست تماس‌ها\n"
                 + "• اعلان ویندوز و کپی یک‌کلیکی رمز پویا\n"
                 + "• API رمز پویا برای پرکردن خودکار\n"
-                + "• باتری گوشی، آدرس ثابت payambin.local\n"
+                + "• باتری گوشی، آدرس ثابت payambin-tsnet.local\n"
                 + "• آپدیت خودکار");
 
         LinearLayout k3 = card();

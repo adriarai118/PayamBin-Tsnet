@@ -14,7 +14,7 @@ import java.util.List;
 
 /** دادن فایل به بله/واتس‌اپ/تلگرام (به‌جای FileProvider که کتابخانه‌ی جانبی لازم دارد) */
 public class FilesProvider extends ContentProvider {
-    public static final String AUTHORITY = "com.adriarai.payambin.files";
+    public static final String AUTHORITY = "com.adriarai.payambin.tsnet.files";
 
     @Override
     public boolean onCreate() {

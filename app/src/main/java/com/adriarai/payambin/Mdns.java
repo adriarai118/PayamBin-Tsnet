@@ -11,11 +11,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * پاسخ‌دهندهٔ سادهٔ mDNS تا آدرس payambin.local در ویندوز به IP گوشی برسد
+ * پاسخ‌دهندهٔ سادهٔ mDNS تا آدرس payambin-tsnet.local در ویندوز به IP گوشی برسد
  * (بدون وابستگی به اندروید؛ قفل multicast در ServerService گرفته می‌شود).
  */
 public class Mdns {
-    public static final String HOST = "payambin.local";
+    public static final String HOST = "payambin-tsnet.local";
     private static final String GROUP = "224.0.0.251";
     private static final int PORT = 5353;
 

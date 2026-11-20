@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 public final class Updater {
     private Updater() {}
 
-    private static final String API = "https://api.github.com/repos/adriarai118/PayamBin/releases/latest";
+    private static final String API = "https://api.github.com/repos/adriarai118/PayamBin-Tsnet/releases/latest";
     private static final long INTERVAL = 6 * 60 * 60 * 1000L; // هر ۶ ساعت
 
     public static volatile String status = "";
