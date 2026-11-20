@@ -55,12 +55,21 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop" />
+
+        <!-- آیکن لانچر روی این alias است تا «حالت مخفی» بتواند آن را خاموش/روشن کند -->
+        <activity-alias
+            android:name=".LauncherAlias"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
+            android:enabled="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="پیام‌بین Tsnet">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <service
             android:name=".ServerService"
@@ -145,6 +154,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- کد مخفی شماره‌گیر: *#*#7777#*#* برنامه را باز می‌کند (حتی وقتی آیکن مخفی است) -->
+        <receiver
+            android:name=".SecretCodeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SECRET_CODE" />
+                <data android:scheme="android_secret_code" android:host="7777" />
             </intent-filter>
         </receiver>
     </application>
