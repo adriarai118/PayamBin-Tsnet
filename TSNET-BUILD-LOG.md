@@ -134,3 +134,13 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   gomobile bind does not create the output directory.
   Fix: `mkdir -p ../../app/libs` in the workflow before gomobile bind.
   Run #14 (commit 1c3efe6) failed the same way (11m 45s).
+
+## CI fix 3 — 20 Nov 2026 (run #17 failed)
+- "Build tsnet AAR" step SUCCEEDED (11m 45s) — the mkdir fix worked.
+  Next failure was Gradle manifest merger:
+  `uses-sdk:minSdkVersion 23 cannot be smaller than version 26
+  declared in library [tsnet.aar]`.
+  Fix: app minSdk 23 -> 26 in app/build.gradle (tsnet/gomobile needs
+  API 26+ anyway; TailscaleManager already guarded for API < 26).
+  Consequence: this build no longer installs on Android 5-7.1
+  (API 23-25). Only the separate PayamBin-Tsnet repo is affected.
