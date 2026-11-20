@@ -169,3 +169,11 @@ denied` می‌میرد؛ tsnet موقع بالا آمدن همان را صدا 
 کلید ورود ندارد. راه‌حل: `tsnet/go/android_ifaces.go` با
 `netmon.RegisterInterfaceGetter` لیست اینترفیس‌ها را بدون netlink
 (ioctl + ‎`/sys/class/net` + ‎`/proc/net/if_inet6`) می‌سازد.
+
+### اصلاح دوم (20 Nov 2026): /sys/class/net هم بسته است
+بعد از اصلاح netlink، خطا شد `read /sys/class/net: permission denied` —
+روی این گوشی حتی خواندن دایرکتوری /sys/class/net ممنوع است. پس لیست
+اینترفیس‌ها حالا از API اندروید می‌آید: `TailscaleManager` با
+`NetworkInterface.getNetworkInterfaces()` لیست را جمع می‌کند و قبل از
+شروع، با `SetInterfacesJSON` به Go می‌دهد؛ getter همین لیستِ cacheشده
+را برمی‌گرداند و /sys فقط fallback است.
