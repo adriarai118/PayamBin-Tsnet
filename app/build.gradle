@@ -7,7 +7,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.adriarai.payambin'
+        applicationId 'com.adriarai.payambin.tsnet' // جدا از نسخهٔ اصلی، تا کنار آن نصب شود
         minSdk 26 // tsnet (gomobile) به API 26+ نیاز دارد؛ روی اندروید قدیمی‌تر نصب نمی‌شود
         targetSdk 34
         // شمارهٔ نسخه = شمارهٔ اجرای GitHub Actions (برای آپدیت خودکار)
