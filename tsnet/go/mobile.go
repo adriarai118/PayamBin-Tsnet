@@ -100,6 +100,11 @@ func Start(hostname, authKey, stateDir string, localPort int) string {
 	cur = status{State: "starting", Port: localPort}
 	mu.Unlock()
 
+	// Android 11+ blocks net.Interfaces() for app UIDs; register the
+	// netlink-free interface getter before the tsnet server starts
+	// (its netmon calls net.Interfaces() during Up()).
+	registerAndroidInterfaceGetter()
+
 	go runNode(hostname, authKey, stateDir, localPort)
 	return ""
 }
@@ -135,6 +140,7 @@ func runNode(hostname, authKey, stateDir string, localPort int) {
 			cur.State = "error"
 			cur.Error = err.Error()
 			cur.LoginURL = ""
+			running = false // allow a later Start() to retry
 		}
 		mu.Unlock()
 		return
@@ -171,6 +177,7 @@ func runNode(hostname, authKey, stateDir string, localPort int) {
 		if running {
 			cur.State = "error"
 			cur.Error = "listen: " + err.Error()
+			running = false // allow a later Start() to retry
 		}
 		mu.Unlock()
 		return
