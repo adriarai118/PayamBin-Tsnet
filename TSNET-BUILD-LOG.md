@@ -212,3 +212,27 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   API رسمی NetworkInterface تنها راهِ درست است.
 - بررسی: go vet PASS؛ gomobile bind PASS؛ بیلد دستی
   MANUAL_BUILD_OK و apksigner verify OK.
+
+## 20 Nov 2026 — APK دستی نصب نمی‌شد: «not compatible» (اندروید ۱۶)
+- علت: اسکریپت manual-build.sh به aapt2 link نه min-sdk و نه
+  target-sdk می‌داد؛ مانیفستِ APK دستی هیچ uses-sdk نداشت و
+  targetSdk پیش‌فرض ۱ می‌شد. اندروید ۱۵ به بعد نصبِ برنامه با
+  targetSdk زیر ۲۴ را نمی‌پذیرد — پیام «app isn't compatible».
+  (احتمالاً هیچ‌کدام از APKهای دستی قبلی هم نصب نشده بودند و مصطفی
+  همیشه با بیلدهای CI/آپدیتر تست می‌کرد.)
+- اصلاح: ‎--min-sdk-version 26 --target-sdk-version 34 به aapt2
+  link اضافه شد؛ حالا badging می‌گوید sdkVersion 26 و
+  targetSdkVersion 34 و apksigner verify OK است.
+
+## 20 Nov 2026 — کرش (force stop) موقع روشن کردن سوییچ
+- روی POCO با اندروید ۱۶، به‌محض روشن کردن سوییچ برنامه force stop
+  می‌شد؛ تومب‌استون فقط فریم ‎runtime.raise را نشان می‌داد
+  (BuildId مطابق v33 بود). علت دقیق بدون Abort message مشخص نیست.
+- اصلاح: runNode حالا panic را recover می‌کند و به‌جای کشتن برنامه،
+  آن را به‌صورت خطا در وضعیت نشان می‌دهد («panic: ...») تا دلیلش
+  در خود برنامه دیده شود. pollStatus هم recover دارد. همچنین در
+  ipv6AddrsByIndex یک guard اضافه شد (خط‌های کوتاه‌تر از ۳۲ کاراکتر
+  رد می‌شوند تا slice panic ندهد).
+- بررسی: go vet PASS؛ gomobile bind PASS؛ بیلد دستی
+  MANUAL_BUILD_OK و apksigner verify OK (sdkVersion 26،
+  targetSdkVersion 34).
