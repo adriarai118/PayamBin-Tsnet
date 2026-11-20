@@ -117,6 +117,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Diag.init(this);
+        Stealth.applyRecents(this);
         ScreenService.restoreBrightnessIfNeeded(this);
         loadTheme();
         styleWindow();
@@ -698,6 +699,35 @@ public class MainActivity extends Activity {
             if (!v) ScreenService.disable(this);
         });
         para(kscr, "با این گزینه، بعد از اولین تأیید، اشتراک صفحه در پس‌زمینه آماده می‌ماند و دفعات بعد کامپیوتر بدون هیچ پیغامی وصل می‌شود. در پنجره‌ی تأیید اندروید همیشه «کل صفحه» انتخاب می‌شود، نه یک برنامه‌ی خاص. بعد از ری‌استارت گوشی یک بار تأیید لازم است.");
+
+        LinearLayout kst = card();
+        heading(kst, "👻 حالت مخفی");
+        para(kst, "کد مخفی برای باز کردن برنامه: *#*#7777#*#* — در شماره‌گیر بگیرید. اگر آیکن مخفی شد و کد را فراموش کردید، از تنظیمات گوشی ← برنامه‌ها ← پیام‌بین ← «باز کردن» می‌توانید برنامه را باز کنید.");
+        Switch si = switchRow(kst, "مخفی کردن آیکن از لانچر", Prefs.stealthIconHidden(this));
+        si.setOnCheckedChangeListener((b, v) -> {
+            if (v) {
+                dialog().setMessage("آیکن برنامه از لانچر مخفی می‌شود. برای باز کردن برنامه *#*#7777#*#* را در شماره‌گیر بگیرید.")
+                        .setPositiveButton("مخفی کن", (d, w) -> {
+                            Prefs.setStealthIconHidden(this, true);
+                            Stealth.setIconHidden(this, true);
+                        })
+                        .setNegativeButton("انصراف", (d, w) -> si.setChecked(false)).show();
+            } else {
+                Prefs.setStealthIconHidden(this, false);
+                Stealth.setIconHidden(this, false);
+            }
+        });
+        Switch sr = switchRow(kst, "عدم نمایش در برنامه‌های اخیر", Prefs.stealthRecents(this));
+        sr.setOnCheckedChangeListener((b, v) -> {
+            Prefs.setStealthRecents(this, v);
+            if (v) Stealth.applyRecents(this);
+        });
+        Switch ss = switchRow(kst, "بی‌صدا کردن اعلان‌ها (بدون آیکن در نوار وضعیت)", Prefs.stealthSilent(this));
+        ss.setOnCheckedChangeListener((b, v) -> {
+            Prefs.setStealthSilent(this, v);
+            Stealth.applySilent(this);
+        });
+        para(kst, "اعلان سرویس‌ها کاملاً حذف نمی‌شود؛ اندروید تا وقتی سرور، دوربین یا صفحه فعال است یک اعلان لازم دارد. برنامه در «برنامه‌های فعال» تنظیمات سریع و نقطه‌ی سبز دوربین/میکروفون هم همچنان دیده می‌شوند.");
 
         LinearLayout k3 = card();
         heading(k3, "امنیت");
