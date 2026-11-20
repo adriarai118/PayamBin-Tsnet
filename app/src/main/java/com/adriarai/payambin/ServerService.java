@@ -213,6 +213,7 @@ public class ServerService extends Service {
             if (Prefs.proxyOn(this)) ProxyServer.start(this);
             TailscaleManager.start(this); // فقط وقتی در تنظیمات روشن است
             handler.postDelayed(refresher, 20_000);
+            Watchdog.schedule(this); // نگهبان: اگر سرور افتاد، دوباره روشنش کن
         }
         return START_STICKY;
     }

@@ -14,5 +14,10 @@ public class BootReceiver extends BroadcastReceiver {
             } catch (Exception ignored) {
             }
         }
+        // نگهبان سرور را هم مسلح کن تا بعد از بوت بررسی دوره‌ای ادامه داشته باشد
+        try {
+            Watchdog.schedule(c);
+        } catch (Exception ignored) {
+        }
     }
 }

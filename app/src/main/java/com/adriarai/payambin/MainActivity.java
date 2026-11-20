@@ -623,6 +623,7 @@ public class MainActivity extends Activity {
         heading(k2, "سرور");
         Switch auto = switchRow(k2, "روشن شدن خودکار بعد از ری‌استارت گوشی", Prefs.autoStart(this));
         auto.setOnCheckedChangeListener((b, v) -> Prefs.setAutoStart(this, v));
+        para(k2, "اگر سرور به هر دلیل خاموش شد (کرش یا کشته شدن توسط سیستم)، نگهبان سرور هر ۱۵ دقیقه چک می‌کند و خودکار دوباره روشنش می‌کند.");
         final TextView portBtn = button(k2, "", false, v -> askPort());
 
         LinearLayout kp = card();

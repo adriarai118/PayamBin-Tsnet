@@ -29,6 +29,11 @@ public final class Crash {
                 out.close();
             } catch (Throwable ignored) {
             }
+            // اگر سرور باید روشن باشد، چند ثانیه بعد دوباره روشنش کن
+            try {
+                if (Prefs.wantRunning(app)) Watchdog.scheduleSoon(app);
+            } catch (Throwable ignored) {
+            }
             if (prev != null) prev.uncaughtException(t, e);
         });
     }
