@@ -795,6 +795,18 @@ public class WebServer {
                 NotifStore.get(ctx).clear(r.json().optString("pkg", ""));
                 return Res.json(J.obj("ok", true));
 
+            case "/api/chat/read": {
+                if (!ControlService.isEnabled(ctx)) return Res.json(J.obj("ok", false,
+                        "error", "دسترسی‌پذیری فعال نیست؛ در برنامه ← مجوزها ← «کنترل گوشی» را روشن کنید"));
+                return Res.json(ControlService.readNow());
+            }
+
+            case "/api/chat/more": {
+                if (!ControlService.isEnabled(ctx)) return Res.json(J.obj("ok", false,
+                        "error", "دسترسی‌پذیری فعال نیست؛ در برنامه ← مجوزها ← «کنترل گوشی» را روشن کنید"));
+                return Res.json(ControlService.more());
+            }
+
             default:
                 return Res.err(404, "not found");
         }
