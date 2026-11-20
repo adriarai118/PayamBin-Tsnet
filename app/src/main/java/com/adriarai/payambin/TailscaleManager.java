@@ -48,7 +48,10 @@ public final class TailscaleManager {
 
     /** لیست اینترفیس‌های شبکه از API اندروید، به‌صورت JSON برای Go.
      * Go روی اندروید نه netlink دارد و نه همیشه به /sys/class/net
-     * دسترسی دارد؛ این لیست همان چیزی است که netmon لازم دارد. */
+     * دسترسی دارد؛ این لیست همان چیزی است که netmon لازم دارد.
+     * عین تکنیک خودِ Net.localIps: برای هر اینترفیس try/catch جدا،
+     * چون روی بعضی گوشی‌ها یک متد (مثلاً getMTU روی یک اینترفیس
+     * خاص) استثنا می‌دهد و نباید کل لیست را خراب کند. */
     private static String collectInterfacesJson() {
         try {
             JSONObject root = new JSONObject();
@@ -57,38 +60,58 @@ public final class TailscaleManager {
             if (nis != null) {
                 while (nis.hasMoreElements()) {
                     NetworkInterface ni = nis.nextElement();
-                    JSONObject o = new JSONObject();
-                    o.put("name", ni.getName());
-                    o.put("index", ni.getIndex());
-                    o.put("mtu", ni.getMTU());
-                    byte[] hw = null;
-                    try { hw = ni.getHardwareAddress(); } catch (Throwable ignored) {}
-                    if (hw != null) {
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < hw.length; i++) {
-                            if (i > 0) sb.append(':');
-                            sb.append(String.format("%02x", hw[i] & 0xff));
+                    try {
+                        JSONObject o = new JSONObject();
+                        String name = ni.getName() == null ? "" : ni.getName();
+                        o.put("name", name);
+                        try { o.put("index", ni.getIndex()); } catch (Throwable ignored) { o.put("index", 0); }
+                        try { o.put("mtu", ni.getMTU()); } catch (Throwable ignored) { o.put("mtu", 0); }
+                        byte[] hw = null;
+                        try { hw = ni.getHardwareAddress(); } catch (Throwable ignored) {}
+                        if (hw != null) {
+                            StringBuilder sb = new StringBuilder();
+                            for (int i = 0; i < hw.length; i++) {
+                                if (i > 0) sb.append(':');
+                                sb.append(String.format("%02x", hw[i] & 0xff));
+                            }
+                            o.put("hw", sb.toString());
+                        } else {
+                            o.put("hw", "");
                         }
-                        o.put("hw", sb.toString());
-                    } else {
-                        o.put("hw", "");
+                        boolean up = false;
+                        boolean loopback = false;
+                        try { up = ni.isUp(); } catch (Throwable ignored) {}
+                        try { loopback = ni.isLoopback(); } catch (Throwable ignored) {}
+                        o.put("up", up);
+                        o.put("loopback", loopback);
+                        // طول prefix را از getInterfaceAddresses می‌گیریم،
+                        // ولی اگر نشد، آدرس را با /32 یا /128 می‌گذاریم.
+                        java.util.Map<String, Integer> bitsByIp = new java.util.HashMap<>();
+                        try {
+                            for (InterfaceAddress ia : ni.getInterfaceAddresses()) {
+                                if (ia == null || ia.getAddress() == null) continue;
+                                bitsByIp.put(ia.getAddress().getHostAddress(), (int) ia.getNetworkPrefixLength());
+                            }
+                        } catch (Throwable ignored) {}
+                        JSONArray addrs = new JSONArray();
+                        for (java.net.InetAddress a : java.util.Collections.list(ni.getInetAddresses())) {
+                            if (a == null) continue;
+                            String ip = a.getHostAddress();
+                            if (ip == null) continue;
+                            int pct = ip.indexOf('%');
+                            if (pct >= 0) ip = ip.substring(0, pct); // حذف zone در IPv6
+                            JSONObject ja = new JSONObject();
+                            ja.put("ip", ip);
+                            Integer bits = bitsByIp.get(ip);
+                            if (bits == null) bits = (a instanceof java.net.Inet4Address) ? 32 : 128;
+                            ja.put("bits", bits.intValue());
+                            addrs.put(ja);
+                        }
+                        o.put("addrs", addrs);
+                        list.put(o);
+                    } catch (Throwable ignored) {
+                        // این اینترفیس را رد می‌کنیم، بقیه می‌مانند.
                     }
-                    boolean up = false;
-                    boolean loopback = false;
-                    try { up = ni.isUp(); } catch (Throwable ignored) {}
-                    try { loopback = ni.isLoopback(); } catch (Throwable ignored) {}
-                    o.put("up", up);
-                    o.put("loopback", loopback);
-                    JSONArray addrs = new JSONArray();
-                    for (InterfaceAddress ia : ni.getInterfaceAddresses()) {
-                        if (ia == null || ia.getAddress() == null) continue;
-                        JSONObject a = new JSONObject();
-                        a.put("ip", ia.getAddress().getHostAddress());
-                        a.put("bits", ia.getNetworkPrefixLength());
-                        addrs.put(a);
-                    }
-                    o.put("addrs", addrs);
-                    list.put(o);
                 }
             }
             root.put("interfaces", list);
@@ -128,7 +151,8 @@ public final class TailscaleManager {
                 // لیست اینترفیس‌ها از API اندروید (بدون netlink): Go روی
                 // اندروید نمی‌تواند net.Interfaces() را صدا بزند و حتی
                 // خواندن /sys/class/net هم روی بعضی گوشی‌ها ممنوع است.
-                callString("setInterfacesJSON", collectInterfacesJson());
+                String ifErr = callString("setInterfacesJSON", collectInterfacesJson());
+                if (ifErr != null && !ifErr.isEmpty()) Diag.log("لیست کارت شبکه به Go نرسید: " + ifErr);
                 callString("start", hostname, authKey, stateDir, Long.valueOf(Prefs.port(app)));
                 Diag.log("Tailscale شروع شد — " + statusText(app));
             } catch (Throwable e) {
