@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -129,6 +131,20 @@ func runNode(hostname, authKey, stateDir string, localPort int) {
 	mu.Lock()
 	cancel = cancelFn
 	mu.Unlock()
+
+	// Android has no $HOME, no /tmp and a cwd of "/": during Up(),
+	// ipnlocal calls logpolicy.LogsDir, which tries UserCacheDir,
+	// the cwd and MkdirTemp in turn and panics with "no safe place
+	// found to store log state" when all of them fail. Point it at
+	// our own writable state dir instead (LogsDir honours
+	// $TS_LOGS_DIR first); TMPDIR too, for anything using MkdirTemp.
+	if err := os.MkdirAll(stateDir, 0700); err == nil {
+		_ = os.Setenv("TS_LOGS_DIR", stateDir)
+		tmpDir := filepath.Join(stateDir, "tmp")
+		if err := os.MkdirAll(tmpDir, 0700); err == nil {
+			_ = os.Setenv("TMPDIR", tmpDir)
+		}
+	}
 
 	s := &tailtsnet.Server{
 		Hostname: hostname,
