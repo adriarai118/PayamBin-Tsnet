@@ -690,6 +690,15 @@ public class MainActivity extends Activity {
         });
         para(kcam, "بعد از ری‌استارت گوشی یک بار برنامه را باز کنید تا دوباره آماده شود. هر کس رمز پیام‌بین را داشته باشد می‌تواند دوربین را روشن کند؛ نقطه‌ی سبز و اعلان «در حال پخش» همیشه دیده می‌شود.");
 
+        LinearLayout kscr = card();
+        heading(kscr, "🖥 صفحه");
+        Switch sbs = switchRow(kscr, "همیشه آماده (بعد از یک بار تأیید، وصل شدن از کامپیوتر بدون پیغام روی گوشی)", Prefs.screenStandby(this));
+        sbs.setOnCheckedChangeListener((b, v) -> {
+            Prefs.setScreenStandby(this, v);
+            if (!v) ScreenService.disable(this);
+        });
+        para(kscr, "با این گزینه، بعد از اولین تأیید، اشتراک صفحه در پس‌زمینه آماده می‌ماند و دفعات بعد کامپیوتر بدون هیچ پیغامی وصل می‌شود. در پنجره‌ی تأیید اندروید همیشه «کل صفحه» انتخاب می‌شود، نه یک برنامه‌ی خاص. بعد از ری‌استارت گوشی یک بار تأیید لازم است.");
+
         LinearLayout k3 = card();
         heading(k3, "امنیت");
         final TextView pinTv = para(k3, "");

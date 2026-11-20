@@ -39,7 +39,7 @@ public class ScreenService extends Service {
     private static final int NOTIF_ID = 90, ASK_ID = 91;
     private static final String CH = "screen";
 
-    public static volatile String state = "off"; // off | waiting_tap | on | error
+    public static volatile String state = "off"; // off | waiting_tap | on | ready | error
     public static volatile String error = null;
     public static volatile String quality = "mid";
     public static volatile boolean dimPref = true;
@@ -85,6 +85,7 @@ public class ScreenService extends Service {
         error = null;
         if (instance != null && instance.projection != null) {
             state = "on";
+            instance.updateNotification();
             return;
         }
         // اندروید هر بار رضایت کاربر را برای ضبط صفحه می‌خواهد
@@ -100,8 +101,41 @@ public class ScreenService extends Service {
     }
 
     public static void stop(Context c) {
+        ScreenService s = instance;
+        if (s != null && s.projection != null && Prefs.screenStandby(c)) {
+            s.main.post(s::goStandby);
+            return;
+        }
         c.getApplicationContext().stopService(new Intent(c.getApplicationContext(), ScreenService.class));
         state = "off";
+    }
+
+    /** کاملاً قطع شود (حتی اگر «همیشه آماده» روشن است) */
+    public static void disable(Context c) {
+        c.getApplicationContext().stopService(new Intent(c.getApplicationContext(), ScreenService.class));
+        state = "off";
+    }
+
+    /** اشتراک را قطع کن ولی اجازه‌ی ضبط را زنده نگه دار تا دفعات بعد بی‌پیغام وصل شود */
+    private boolean goStandby() {
+        if (!Prefs.screenStandby(this) || projection == null) {
+            stopSelf();
+            return false;
+        }
+        state = "ready";
+        setPaused(true);
+        updateNotification();
+        Diag.log("صفحه در حالت آماده ماند (بدون ضبط)");
+        return true;
+    }
+
+    /** متن اعلان سرویس را با وضعیت فعلی هماهنگ کن */
+    private void updateNotification() {
+        try {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (nm != null) nm.notify(NOTIF_ID, buildNotification());
+        } catch (Exception ignored) {
+        }
     }
 
     public static JSONObject status() {
@@ -225,9 +259,10 @@ public class ScreenService extends Service {
                 new Intent(this, ScreenService.class).setAction(ACTION_STOP),
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CH) : new Notification.Builder(this);
+        boolean ready = "ready".equals(state);
         return b.setSmallIcon(R.drawable.ic_stat)
-                .setContentTitle("🖥 صفحه‌ی گوشی با کامپیوتر به اشتراک گذاشته شده")
-                .setContentText("لمس کنید تا قطع شود")
+                .setContentTitle(ready ? "🖥 صفحه آماده‌ی اشتراک است" : "🖥 صفحه‌ی گوشی با کامپیوتر به اشتراک گذاشته شده")
+                .setContentText(ready ? "کامپیوتر می‌تواند بدون تأیید وصل شود — لمس کنید تا کاملاً قطع شود" : "لمس کنید تا قطع شود")
                 .setOngoing(true)
                 .setContentIntent(stop)
                 .addAction(new Notification.Action.Builder(null, "قطع اشتراک صفحه", stop).build())

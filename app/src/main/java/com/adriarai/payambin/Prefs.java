@@ -212,6 +212,15 @@ public final class Prefs {
         sp(c).edit().putBoolean("screen_dim", v).apply();
     }
 
+    /** صفحه همیشه آماده: بعد از یک بار تأیید، اشتراک در پس‌زمینه بماند و بدون پیغام دوباره وصل شود */
+    public static boolean screenStandby(Context c) {
+        return sp(c).getBoolean("screen_standby", true);
+    }
+
+    public static void setScreenStandby(Context c, boolean v) {
+        sp(c).edit().putBoolean("screen_standby", v).apply();
+    }
+
     /** تم برنامه: system | light | dark */
     public static String theme(Context c) {
         return sp(c).getString("theme", "system");

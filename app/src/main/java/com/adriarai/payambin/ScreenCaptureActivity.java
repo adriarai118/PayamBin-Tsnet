@@ -15,7 +15,14 @@ public class ScreenCaptureActivity extends Activity {
         super.onCreate(b);
         try {
             MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
-            startActivityForResult(mpm.createScreenCaptureIntent(), REQ);
+            // اندروید ۱۴ به بعد: پیش‌فرض «کل صفحه» باشد، نه انتخاب یک برنامه‌ی خاص
+            Intent cap;
+            if (Build.VERSION.SDK_INT >= 34) {
+                cap = mpm.createScreenCaptureIntent(android.media.projection.MediaProjectionConfig.createConfigForDefaultDisplay());
+            } else {
+                cap = mpm.createScreenCaptureIntent();
+            }
+            startActivityForResult(cap, REQ);
         } catch (Exception e) {
             ScreenService.state = "error";
             ScreenService.error = "ضبط صفحه پشتیبانی نمی‌شود: " + e.getMessage();
