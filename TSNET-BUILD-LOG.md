@@ -196,3 +196,19 @@ Script: `~/workspace/toolchains/tmp/manual-build.sh`
   setInterfacesJSON را در Tsnetmobile نشان می‌دهد؛ بیلد دستی
   MANUAL_BUILD_OK و apksigner verify OK (package
   com.adriarai.payambin.tsnet).
+
+## 20 Nov 2026 — تکنیک خودِ PayamBin برای کارت شبکه (اندروید ۱۶)
+- مصطفی گفت خطا هنوز هست و پیشنهاد کرد از تکنیک خود PayamBin
+  (Net.localIps) استفاده شود. Net.localIps با
+  NetworkInterface.getNetworkInterfaces() + getInetAddresses کار
+  می‌کند و برای هر اینترفیس try/catch جدا دارد.
+- اشکال نسخهٔ v30: در collectInterfacesJson قبلی یک استثنا (مثلاً
+  getMTU روی یک اینترفیس خاص) کل JSON را خالی می‌کرد و Go دوباره
+  سراغ /sys می‌رفت. حالا دقیقاً مثل Net: برای هر اینترفیس و هر
+  خاصیت try/catch جدا، prefix از getInterfaceAddresses با fallback
+  ‎/32 یا /128، حذف zone (%wlan0) از آدرس IPv6، و نتیجهٔ
+  SetInterfacesJSON در Diag.log نوشته می‌شود.
+- گوشی مصطفی اندروید ۱۶ است — همان‌جا /sys/class/net بسته است و
+  API رسمی NetworkInterface تنها راهِ درست است.
+- بررسی: go vet PASS؛ gomobile bind PASS؛ بیلد دستی
+  MANUAL_BUILD_OK و apksigner verify OK.
